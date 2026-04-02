@@ -6,326 +6,109 @@
 <title>YouTube 채널 모니터</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 :root {
-  --bg: #0f0f0f;
-  --bg2: #1a1a1a;
-  --bg3: #222;
-  --border: rgba(255,255,255,0.08);
-  --border2: rgba(255,255,255,0.14);
-  --text: #f0f0f0;
-  --text2: #888;
-  --text3: #555;
-  --accent: #ff4444;
-  --accent2: #ff6b6b;
-  --green: #4ade80;
-  --blue: #60a5fa;
-  --amber: #fbbf24;
-  --font: 'Noto Sans KR', system-ui, sans-serif;
+  --bg: #0f0f0f; --bg2: #1a1a1a; --bg3: #222;
+  --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
+  --text: #f0f0f0; --text2: #888; --text3: #555;
+  --accent: #ff4444; --green: #4ade80; --blue: #60a5fa; --amber: #fbbf24;
 }
-
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap');
-
-body {
-  font-family: var(--font);
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  line-height: 1.6;
-}
-
-/* Layout */
+body { font-family: 'Noto Sans KR', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 .app { display: grid; grid-template-columns: 300px 1fr; min-height: 100vh; }
-
-/* Sidebar */
-.sidebar {
-  background: var(--bg2);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow-y: auto;
-}
-
-.logo {
-  padding: 24px 20px 16px;
-  border-bottom: 1px solid var(--border);
-}
-.logo-title {
-  font-family: 'Space Mono', monospace;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--accent);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
+.sidebar { background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+.logo { padding: 24px 20px 16px; border-bottom: 1px solid var(--border); }
+.logo-title { font-family: 'Space Mono', monospace; font-size: 13px; font-weight: 700; color: var(--accent); letter-spacing: 0.05em; }
+.api-badge { font-size: 10px; background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.2); color: var(--green); border-radius: 4px; padding: 1px 6px; margin-left: 6px; }
 .logo-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
-
 .sidebar-section { padding: 16px 20px; border-bottom: 1px solid var(--border); }
-.sidebar-label {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text3);
-  margin-bottom: 10px;
-}
-
-/* Input styles */
-input, select, textarea {
-  width: 100%;
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--text);
-  font-family: var(--font);
-  font-size: 13px;
-  padding: 8px 10px;
-  outline: none;
-  transition: border-color 0.15s;
-}
+.sidebar-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
+input, select { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: 'Noto Sans KR', sans-serif; font-size: 13px; padding: 8px 10px; outline: none; transition: border-color 0.15s; }
 input:focus, select:focus { border-color: var(--border2); }
 input::placeholder { color: var(--text3); }
-select { cursor: pointer; }
-select option { background: var(--bg2); }
-
-.add-row { display: flex; gap: 6px; }
-.add-row input { flex: 1; }
-
-.btn {
-  background: transparent;
-  border: 1px solid var(--border2);
-  border-radius: 6px;
-  color: var(--text);
-  cursor: pointer;
-  font-family: var(--font);
-  font-size: 12px;
-  padding: 8px 14px;
-  transition: all 0.15s;
-  white-space: nowrap;
-}
-.btn:hover { background: var(--bg3); border-color: var(--border2); }
-.btn-accent {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
-  font-weight: 700;
-}
-.btn-accent:hover { background: var(--accent2); border-color: var(--accent2); }
+select { cursor: pointer; } select option { background: var(--bg2); }
+.add-row { display: flex; gap: 6px; } .add-row input { flex: 1; }
+.btn { background: transparent; border: 1px solid var(--border2); border-radius: 6px; color: var(--text); cursor: pointer; font-family: 'Noto Sans KR', sans-serif; font-size: 12px; padding: 8px 14px; transition: all 0.15s; white-space: nowrap; }
+.btn:hover { background: var(--bg3); }
+.btn-accent { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+.btn-accent:hover { opacity: 0.85; }
 .btn-full { width: 100%; margin-top: 8px; }
 .btn-monitor { width: 100%; padding: 10px; font-size: 13px; font-weight: 700; }
 .btn-monitor.active { background: var(--green); border-color: var(--green); color: #000; }
-
-.error-msg { font-size: 11px; color: var(--accent2); margin-top: 6px; }
-
-/* Channel list */
-.channel-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--border);
-}
+.msg { font-size: 11px; margin-top: 6px; }
+.msg.err { color: #ff6b6b; } .msg.info { color: var(--text2); }
+.channel-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }
 .channel-item:last-child { border-bottom: none; }
 .channel-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .ch-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.ch-name { font-size: 12px; font-weight: 500; truncate: true; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 160px; }
-.ch-id { font-size: 10px; color: var(--text3); font-family: 'Space Mono', monospace; }
-.ch-remove { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 16px; padding: 0 2px; line-height: 1; flex-shrink: 0; }
+.ch-name { font-size: 12px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 170px; }
+.ch-sub { font-size: 10px; color: var(--text3); }
+.ch-remove { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 16px; padding: 0 2px; flex-shrink: 0; }
 .ch-remove:hover { color: var(--accent); }
-
-/* Keyword tags */
 .kw-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
-.kw-tag {
-  background: rgba(96,165,250,0.1);
-  border: 1px solid rgba(96,165,250,0.2);
-  border-radius: 4px;
-  color: var(--blue);
-  font-size: 11px;
-  padding: 2px 8px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
+.kw-tag { background: rgba(96,165,250,0.1); border: 1px solid rgba(96,165,250,0.2); border-radius: 4px; color: var(--blue); font-size: 11px; padding: 2px 8px; display: flex; align-items: center; gap: 4px; }
 .kw-tag button { background: none; border: none; color: var(--blue); cursor: pointer; font-size: 13px; padding: 0; line-height: 1; }
-
-/* Status */
 .status-area { padding: 12px 20px; margin-top: auto; border-top: 1px solid var(--border); }
 .status-row { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text2); }
 .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); }
 .status-dot.live { background: var(--green); animation: blink 2s infinite; }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 .last-updated { font-size: 10px; color: var(--text3); margin-top: 4px; }
-
-/* Main content */
 .main { display: flex; flex-direction: column; }
-
-/* Topbar */
-.topbar {
-  background: var(--bg2);
-  border-bottom: 1px solid var(--border);
-  padding: 12px 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
+.topbar { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
 .stats { display: flex; gap: 24px; }
-.stat { text-align: center; }
 .stat-n { font-family: 'Space Mono', monospace; font-size: 20px; font-weight: 700; line-height: 1; }
-.stat-label { font-size: 10px; color: var(--text3); margin-top: 2px; }
-.stat-n.green { color: var(--green); }
-.stat-n.blue { color: var(--blue); }
-.stat-n.amber { color: var(--amber); }
-
+.stat-label { font-size: 10px; color: var(--text3); margin-top: 2px; text-align: center; }
+.stat-n.green { color: var(--green); } .stat-n.blue { color: var(--blue); } .stat-n.amber { color: var(--amber); }
 .tabs { display: flex; gap: 2px; }
-.tab {
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  color: var(--text2);
-  cursor: pointer;
-  font-family: var(--font);
-  font-size: 12px;
-  padding: 6px 12px;
-  transition: all 0.15s;
-}
+.tab { background: transparent; border: 1px solid transparent; border-radius: 6px; color: var(--text2); cursor: pointer; font-family: 'Noto Sans KR', sans-serif; font-size: 12px; padding: 6px 12px; transition: all 0.15s; }
 .tab:hover { color: var(--text); background: var(--bg3); }
 .tab.active { color: var(--text); background: var(--bg3); border-color: var(--border2); }
-
-/* Notification banner */
-.notif {
-  background: rgba(74,222,128,0.08);
-  border-bottom: 1px solid rgba(74,222,128,0.2);
-  color: var(--green);
-  font-size: 12px;
-  padding: 8px 24px;
-  display: none;
-}
+.notif { background: rgba(74,222,128,0.08); border-bottom: 1px solid rgba(74,222,128,0.2); color: var(--green); font-size: 12px; padding: 8px 24px; display: none; }
 .notif.show { display: block; }
-
-/* Video grid */
 .video-area { padding: 16px 24px; flex: 1; }
 .video-list { display: flex; flex-direction: column; gap: 8px; }
-
-.video-card {
-  display: flex;
-  gap: 14px;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 12px 16px;
-  cursor: pointer;
-  transition: all 0.15s;
-  text-decoration: none;
-  color: inherit;
-}
+.video-card { display: flex; gap: 14px; background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; text-decoration: none; color: inherit; transition: all 0.15s; }
 .video-card:hover { border-color: var(--border2); background: var(--bg3); }
 .video-card.new-video { border-left: 3px solid var(--green); }
 .video-card.kw-video { border-left: 3px solid var(--blue); }
-
-.thumb {
-  width: 120px;
-  height: 67px;
-  border-radius: 6px;
-  object-fit: cover;
-  background: var(--bg3);
-  flex-shrink: 0;
-}
-
+.thumb { width: 120px; height: 67px; border-radius: 6px; object-fit: cover; background: var(--bg3); flex-shrink: 0; }
 .video-info { flex: 1; min-width: 0; }
-.video-title {
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.4;
-  margin-bottom: 6px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
+.video-title { font-size: 14px; font-weight: 500; line-height: 1.4; margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .video-title.kw-match { color: var(--blue); }
 .video-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-
-.badge {
-  font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-}
+.badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; }
 .badge-new { background: rgba(74,222,128,0.12); color: var(--green); border: 1px solid rgba(74,222,128,0.2); }
 .badge-kw { background: rgba(96,165,250,0.12); color: var(--blue); border: 1px solid rgba(96,165,250,0.2); }
-.badge-ch { font-size: 10px; color: var(--text2); }
-.badge-time { font-size: 11px; color: var(--text3); }
-
-/* Empty state */
-.empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 80px 24px;
-  text-align: center;
-  color: var(--text3);
-}
-.empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.3; }
+.meta-text { font-size: 11px; color: var(--text3); }
+.empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 24px; text-align: center; }
 .empty-title { font-size: 15px; color: var(--text2); margin-bottom: 6px; }
-.empty-desc { font-size: 12px; line-height: 1.7; }
-.empty-desc code {
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  font-family: 'Space Mono', monospace;
-  font-size: 11px;
-  padding: 1px 5px;
-  color: var(--blue);
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .app { grid-template-columns: 1fr; }
-  .sidebar { position: static; height: auto; }
-}
-
-/* Scrollbar */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+.empty-desc { font-size: 12px; color: var(--text3); line-height: 1.7; }
+.quota-note { font-size: 10px; color: var(--text3); margin-top: 8px; text-align: center; line-height: 1.6; }
+::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+@media (max-width: 768px) { .app { grid-template-columns: 1fr; } .sidebar { position: static; height: auto; } }
 </style>
 </head>
 <body>
 <div class="app">
-
-  <!-- Sidebar -->
   <aside class="sidebar">
     <div class="logo">
-      <div class="logo-title">YT Monitor</div>
-      <div class="logo-sub">RSS 기반 · API 키 불필요</div>
+      <div class="logo-title">YT Monitor <span class="api-badge">API v3</span></div>
+      <div class="logo-sub">YouTube Data API · 모든 채널 지원</div>
     </div>
 
     <div class="sidebar-section">
       <div class="sidebar-label">채널 추가</div>
       <div class="add-row">
-        <input type="text" id="channelInput" placeholder="UCxxxxxxxxxxxxxxxxxxxxxxxx" />
+        <input type="text" id="channelInput" placeholder="채널 ID 또는 @핸들" />
         <button class="btn btn-accent" onclick="addChannel()">+</button>
       </div>
-      <div id="addError" class="error-msg"></div>
-      <div style="font-size:10px;color:var(--text3);margin-top:6px;line-height:1.6;">
-        채널 페이지 → 더보기 → 채널 공유<br>→ 채널 ID 복사 (UC로 시작)
-      </div>
+      <div id="addMsg" class="msg"></div>
       <div id="channelList" style="margin-top:10px;"></div>
     </div>
 
     <div class="sidebar-section">
       <div class="sidebar-label">키워드 필터</div>
-      <div class="add-row">
-        <input type="text" id="kwInput" placeholder="키워드 입력 후 Enter" />
-      </div>
+      <input type="text" id="kwInput" placeholder="키워드 입력 후 Enter" />
       <div class="kw-tags" id="kwTags"></div>
     </div>
 
@@ -339,7 +122,8 @@ select option { background: var(--bg2); }
         <option value="60">1시간마다</option>
       </select>
       <button class="btn btn-monitor" id="monitorBtn" onclick="toggleMonitor()">모니터링 시작</button>
-      <button class="btn btn-full" onclick="fetchAll()" style="margin-top:4px;">지금 새로고침</button>
+      <button class="btn btn-full" onclick="fetchAll()">지금 새로고침</button>
+      <div class="quota-note">일일 무료 할당량 10,000유닛<br>채널 1개 조회 약 3유닛 소모</div>
     </div>
 
     <div class="status-area">
@@ -351,26 +135,13 @@ select option { background: var(--bg2); }
     </div>
   </aside>
 
-  <!-- Main -->
   <main class="main">
     <div class="topbar">
       <div class="stats">
-        <div class="stat">
-          <div class="stat-n" id="statCh">0</div>
-          <div class="stat-label">채널</div>
-        </div>
-        <div class="stat">
-          <div class="stat-n blue" id="statTotal">0</div>
-          <div class="stat-label">총 영상</div>
-        </div>
-        <div class="stat">
-          <div class="stat-n green" id="statNew">0</div>
-          <div class="stat-label">새 영상</div>
-        </div>
-        <div class="stat">
-          <div class="stat-n amber" id="statKw">0</div>
-          <div class="stat-label">키워드 매칭</div>
-        </div>
+        <div class="stat"><div class="stat-n" id="statCh">0</div><div class="stat-label">채널</div></div>
+        <div class="stat"><div class="stat-n blue" id="statTotal">0</div><div class="stat-label">총 영상</div></div>
+        <div class="stat"><div class="stat-n green" id="statNew">0</div><div class="stat-label">새 영상</div></div>
+        <div class="stat"><div class="stat-n amber" id="statKw">0</div><div class="stat-label">키워드</div></div>
       </div>
       <div class="tabs">
         <button class="tab active" onclick="switchTab('all',this)">전체</button>
@@ -384,13 +155,8 @@ select option { background: var(--bg2); }
     <div class="video-area">
       <div class="video-list" id="videoList">
         <div class="empty">
-          <div class="empty-icon">📺</div>
           <div class="empty-title">채널을 추가하고 모니터링을 시작하세요</div>
-          <div class="empty-desc">
-            YouTube 채널 페이지에서 채널 ID를<br>
-            복사해서 사이드바에 붙여넣으세요<br><br>
-            채널 ID 형식: <code>UCxxxxxxxxxxxxxxxxxxxxxxxxx</code>
-          </div>
+          <div class="empty-desc">채널 ID(UCxxxxxxxx) 또는 @핸들을 입력하면<br>모든 채널의 최신 영상을 불러올 수 있어요</div>
         </div>
       </div>
     </div>
@@ -398,277 +164,272 @@ select option { background: var(--bg2); }
 </div>
 
 <script>
-const PROXY = 'https://api.allorigins.win/get?url=';
-let channels = JSON.parse(localStorage.getItem('yt_channels') || '[]');
-let keywords = JSON.parse(localStorage.getItem('yt_keywords') || '[]');
+const API_KEY = 'AIzaSyBeD-J90ABEMI2djnm0dcG-RCZoj91bvBw';
+const BASE = 'https://www.googleapis.com/youtube/v3';
+const COLORS = ['#ff4444','#60a5fa','#4ade80','#fbbf24','#a78bfa','#f472b6','#34d399','#fb923c'];
+
+let channels = JSON.parse(localStorage.getItem('ytm_channels') || '[]');
+let keywords = JSON.parse(localStorage.getItem('ytm_keywords') || '[]');
 let allVideos = [];
-let seenIds = new Set(JSON.parse(localStorage.getItem('yt_seen') || '[]'));
+let seenIds = new Set(JSON.parse(localStorage.getItem('ytm_seen') || '[]'));
 let monitorInterval = null;
 let isMonitoring = false;
 let currentTab = 'all';
 
-const COLORS = ['#ff4444','#60a5fa','#4ade80','#fbbf24','#a78bfa','#f472b6','#34d399','#fb923c'];
-
 function save() {
-  localStorage.setItem('yt_channels', JSON.stringify(channels));
-  localStorage.setItem('yt_keywords', JSON.stringify(keywords));
-  localStorage.setItem('yt_seen', JSON.stringify([...seenIds].slice(-500)));
+  localStorage.setItem('ytm_channels', JSON.stringify(channels));
+  localStorage.setItem('ytm_keywords', JSON.stringify(keywords));
+  localStorage.setItem('ytm_seen', JSON.stringify([...seenIds].slice(-2000)));
 }
 
-async function fetchFeed(channelId) {
-  const url = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
+async function api(path, params) {
+  const url = new URL(BASE + path);
+  url.searchParams.set('key', API_KEY);
+  Object.entries(params).forEach(([k,v]) => url.searchParams.set(k,v));
+  const r = await fetch(url);
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.error?.message || 'API 오류');
+  return d;
+}
+
+async function resolveChannelId(input) {
+  input = input.trim();
+  if (/^UC[\w-]{22}$/.test(input)) return input;
+  const handle = input.startsWith('@') ? input : '@' + input;
   try {
-    const r = await fetch(PROXY + encodeURIComponent(url));
-    const d = await r.json();
-    if (!d.contents) return [];
-    return parseRSS(d.contents, channelId);
-  } catch(e) { return []; }
+    const d = await api('/channels', { part:'id', forHandle: handle, maxResults:1 });
+    if (d.items?.length) return d.items[0].id;
+  } catch(e) {}
+  const d2 = await api('/channels', { part:'id', forUsername: input.replace(/^@/,''), maxResults:1 });
+  if (d2.items?.length) return d2.items[0].id;
+  throw new Error('채널을 찾을 수 없습니다');
 }
 
-function parseRSS(xml, channelId) {
-  const doc = new DOMParser().parseFromString(xml, 'text/xml');
-  const ch = channels.find(c => c.id === channelId);
-  const authorName = doc.querySelector('author name')?.textContent || '';
-  return [...doc.querySelectorAll('entry')].map(e => ({
-    id: e.querySelector('videoId')?.textContent || '',
-    title: e.querySelector('title')?.textContent || '',
+async function getChannelInfo(id) {
+  const d = await api('/channels', { part:'snippet,statistics', id });
+  if (!d.items?.length) throw new Error('채널 정보 없음');
+  const c = d.items[0];
+  return { name: c.snippet.title, subs: parseInt(c.statistics.subscriberCount||0) };
+}
+
+async function getVideos(channelId, max=15) {
+  const cd = await api('/channels', { part:'contentDetails', id: channelId });
+  if (!cd.items?.length) return [];
+  const uploadsId = cd.items[0].contentDetails.relatedPlaylists.uploads;
+  const pd = await api('/playlistItems', { part:'contentDetails', playlistId: uploadsId, maxResults: max });
+  if (!pd.items?.length) return [];
+  const ids = pd.items.map(i=>i.contentDetails.videoId).join(',');
+  const vd = await api('/videos', { part:'snippet,statistics', id: ids });
+  const ch = channels.find(c=>c.id===channelId);
+  return (vd.items||[]).map(v=>({
+    id: v.id,
+    title: v.snippet.title,
     channelId,
-    channelName: ch?.name || authorName,
+    channelName: ch?.name || v.snippet.channelTitle,
     channelColor: ch?.color || '#888',
-    published: new Date(e.querySelector('published')?.textContent || ''),
-    url: `https://www.youtube.com/watch?v=${e.querySelector('videoId')?.textContent}`,
-    thumb: `https://img.youtube.com/vi/${e.querySelector('videoId')?.textContent}/mqdefault.jpg`,
+    published: new Date(v.snippet.publishedAt),
+    url: `https://www.youtube.com/watch?v=${v.id}`,
+    thumb: v.snippet.thumbnails?.medium?.url || `https://img.youtube.com/vi/${v.id}/mqdefault.jpg`,
+    views: parseInt(v.statistics.viewCount||0),
     isNew: false,
   }));
 }
 
-function getKeywords() { return keywords; }
-
-function matchesKw(video) {
-  if (!keywords.length) return false;
-  const t = video.title.toLowerCase();
-  return keywords.some(k => t.includes(k.toLowerCase()));
+function fmtViews(n) {
+  if (n>=10000) return Math.floor(n/10000)+'만';
+  if (n>=1000) return (n/1000).toFixed(1)+'k';
+  return n+'';
 }
-
-function timeAgo(date) {
-  const s = (Date.now() - date) / 1000;
-  if (s < 60) return '방금 전';
-  if (s < 3600) return Math.floor(s/60) + '분 전';
-  if (s < 86400) return Math.floor(s/3600) + '시간 전';
-  return Math.floor(s/86400) + '일 전';
+function fmtSubs(n) {
+  if (n>=10000) return Math.floor(n/10000)+'만명';
+  if (n>=1000) return Math.floor(n/1000)+'천명';
+  return n+'명';
+}
+function timeAgo(d) {
+  const s=(Date.now()-d)/1000;
+  if(s<60) return '방금 전';
+  if(s<3600) return Math.floor(s/60)+'분 전';
+  if(s<86400) return Math.floor(s/3600)+'시간 전';
+  if(s<86400*7) return Math.floor(s/86400)+'일 전';
+  return d.toLocaleDateString('ko-KR');
+}
+function matchesKw(v) {
+  if(!keywords.length) return false;
+  const t=v.title.toLowerCase();
+  return keywords.some(k=>t.includes(k.toLowerCase()));
 }
 
 function renderChannels() {
-  const el = document.getElementById('channelList');
-  if (!channels.length) { el.innerHTML = ''; return; }
-  el.innerHTML = channels.map(c => `
+  const el=document.getElementById('channelList');
+  if(!channels.length){el.innerHTML='';return;}
+  el.innerHTML=channels.map(c=>`
     <div class="channel-item">
       <div class="channel-left">
         <div class="ch-dot" style="background:${c.color}"></div>
         <div>
           <div class="ch-name" title="${c.name}">${c.name}</div>
-          <div class="ch-id">${c.id.slice(0,12)}...</div>
+          ${c.subs?`<div class="ch-sub">${fmtSubs(c.subs)}</div>`:''}
         </div>
       </div>
       <button class="ch-remove" onclick="removeChannel('${c.id}')">×</button>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
 function renderKeywords() {
-  const el = document.getElementById('kwTags');
-  el.innerHTML = keywords.map((k,i) => `
-    <div class="kw-tag">${k}<button onclick="removeKeyword(${i})">×</button></div>
-  `).join('');
+  document.getElementById('kwTags').innerHTML=keywords.map((k,i)=>
+    `<div class="kw-tag">${k}<button onclick="removeKeyword(${i})">×</button></div>`).join('');
   renderVideos();
 }
 
 function renderVideos() {
-  const el = document.getElementById('videoList');
-  let vids = [...allVideos].sort((a,b) => b.published - a.published);
-  if (currentTab === 'new') vids = vids.filter(v => v.isNew);
-  if (currentTab === 'keyword') vids = vids.filter(v => matchesKw(v));
+  const el=document.getElementById('videoList');
+  let vids=[...allVideos].sort((a,b)=>b.published-a.published);
+  if(currentTab==='new') vids=vids.filter(v=>v.isNew);
+  if(currentTab==='keyword') vids=vids.filter(v=>matchesKw(v));
 
-  document.getElementById('statCh').textContent = channels.length;
-  document.getElementById('statTotal').textContent = allVideos.length;
-  document.getElementById('statNew').textContent = allVideos.filter(v=>v.isNew).length;
-  document.getElementById('statKw').textContent = allVideos.filter(v=>matchesKw(v)).length;
+  document.getElementById('statCh').textContent=channels.length;
+  document.getElementById('statTotal').textContent=allVideos.length;
+  document.getElementById('statNew').textContent=allVideos.filter(v=>v.isNew).length;
+  document.getElementById('statKw').textContent=allVideos.filter(v=>matchesKw(v)).length;
 
-  if (!vids.length) {
-    el.innerHTML = `<div class="empty">
-      <div class="empty-icon">${currentTab==='new'?'🆕':currentTab==='keyword'?'🔍':'📺'}</div>
-      <div class="empty-title">${currentTab==='new'?'새 영상이 없습니다':currentTab==='keyword'?'키워드 매칭 영상이 없습니다':'채널을 추가하고 모니터링을 시작하세요'}</div>
-      <div class="empty-desc">${currentTab==='all'&&!channels.length?'사이드바에서 채널 ID를 추가해주세요':''}}</div>
-    </div>`;
+  if(!vids.length){
+    el.innerHTML=`<div class="empty"><div class="empty-title">${currentTab==='new'?'새 영상이 없습니다':currentTab==='keyword'?'키워드 매칭 영상이 없습니다':'채널을 추가하고 모니터링을 시작하세요'}</div><div class="empty-desc">${currentTab==='all'&&!channels.length?'사이드바에서 채널을 추가해주세요':''}</div></div>`;
     return;
   }
 
-  el.innerHTML = vids.map(v => {
-    const isKw = matchesKw(v);
-    const cls = v.isNew ? 'new-video' : isKw ? 'kw-video' : '';
-    return `<a class="video-card ${cls}" href="${v.url}" target="_blank" rel="noopener">
-      <img class="thumb" src="${v.thumb}" alt="" onerror="this.style.opacity='0.2'" loading="lazy" />
+  el.innerHTML=vids.map(v=>{
+    const isKw=matchesKw(v);
+    return `<a class="video-card ${v.isNew?'new-video':isKw?'kw-video':''}" href="${v.url}" target="_blank" rel="noopener">
+      <img class="thumb" src="${v.thumb}" alt="" onerror="this.style.opacity='0.15'" loading="lazy"/>
       <div class="video-info">
         <div class="video-title ${isKw?'kw-match':''}">${v.title}</div>
         <div class="video-meta">
-          <span class="badge-ch" style="color:${v.channelColor};font-weight:500;font-size:11px;">▪ ${v.channelName}</span>
-          ${v.isNew ? '<span class="badge badge-new">NEW</span>' : ''}
-          ${isKw ? '<span class="badge badge-kw">키워드</span>' : ''}
-          <span class="badge-time">${timeAgo(v.published)}</span>
+          <span style="color:${v.channelColor};font-size:11px;font-weight:500;">▪ ${v.channelName}</span>
+          ${v.isNew?'<span class="badge badge-new">NEW</span>':''}
+          ${isKw?'<span class="badge badge-kw">키워드</span>':''}
+          ${v.views?`<span class="meta-text">조회 ${fmtViews(v.views)}</span>`:''}
+          <span class="meta-text">${timeAgo(v.published)}</span>
         </div>
       </div>
     </a>`;
   }).join('');
 }
 
-async function addChannel() {
-  const input = document.getElementById('channelInput');
-  const errEl = document.getElementById('addError');
-  const val = input.value.trim();
-  errEl.textContent = '';
-  if (!val) return;
-  if (!val.startsWith('UC') || val.length < 20) {
-    errEl.textContent = '채널 ID는 UC로 시작하는 24자리입니다.';
-    return;
-  }
-  if (channels.find(c => c.id === val)) {
-    errEl.textContent = '이미 추가된 채널입니다.';
-    return;
-  }
-  const color = COLORS[channels.length % COLORS.length];
-  channels.push({ id: val, name: val, color });
-  input.value = '';
-  save();
-  renderChannels();
+function setMsg(text, isErr) {
+  const el=document.getElementById('addMsg');
+  el.textContent=text;
+  el.className='msg '+(isErr?'err':'info');
+}
 
-  const vids = await fetchFeed(val);
-  if (vids.length) {
-    const ch = channels.find(c => c.id === val);
-    if (ch) ch.name = vids[0].channelName;
-    vids.forEach(v => { seenIds.add(v.id); if (!allVideos.find(x=>x.id===v.id)) allVideos.push(v); });
+async function addChannel() {
+  const input=document.getElementById('channelInput');
+  const val=input.value.trim();
+  if(!val) return;
+  setMsg('채널 확인 중...', false);
+  try {
+    const id=await resolveChannelId(val);
+    if(channels.find(c=>c.id===id)){setMsg('이미 추가된 채널입니다.',true);return;}
+    const info=await getChannelInfo(id);
+    const color=COLORS[channels.length%COLORS.length];
+    channels.push({id,name:info.name,color,subs:info.subs});
+    input.value='';
+    setMsg('',false);
     save();
     renderChannels();
+    const vids=await getVideos(id);
+    vids.forEach(v=>{seenIds.add(v.id);if(!allVideos.find(x=>x.id===v.id))allVideos.push(v);});
+    save();
     renderVideos();
-    setStatus('채널 추가 완료', false);
-  } else {
-    errEl.textContent = '채널을 불러올 수 없습니다. 채널 ID를 확인해주세요.';
-    channels = channels.filter(c => c.id !== val);
-    save();
-    renderChannels();
-  }
+    setStatus('채널 추가 완료',false);
+  } catch(e) { setMsg(e.message||'오류가 발생했습니다',true); }
 }
 
 function removeChannel(id) {
-  channels = channels.filter(c => c.id !== id);
-  allVideos = allVideos.filter(v => v.channelId !== id);
-  save();
-  renderChannels();
-  renderVideos();
+  channels=channels.filter(c=>c.id!==id);
+  allVideos=allVideos.filter(v=>v.channelId!==id);
+  save(); renderChannels(); renderVideos();
 }
 
 function addKeyword() {
-  const input = document.getElementById('kwInput');
-  const val = input.value.trim();
-  if (!val || keywords.includes(val)) { input.value = ''; return; }
-  keywords.push(val);
-  input.value = '';
-  save();
-  renderKeywords();
+  const input=document.getElementById('kwInput');
+  const val=input.value.trim();
+  if(!val||keywords.includes(val)){input.value='';return;}
+  keywords.push(val); input.value=''; save(); renderKeywords();
 }
 
-function removeKeyword(i) {
-  keywords.splice(i, 1);
-  save();
-  renderKeywords();
-}
+function removeKeyword(i) { keywords.splice(i,1); save(); renderKeywords(); }
 
 async function fetchAll() {
-  if (!channels.length) return;
-  setStatus('업데이트 중...', true);
-  const prevIds = new Set(allVideos.map(v=>v.id));
-  const newVids = [];
-
-  for (const ch of channels) {
-    const vids = await fetchFeed(ch.id);
-    if (vids.length) ch.name = vids[0].channelName;
-    allVideos = allVideos.filter(v => v.channelId !== ch.id);
-    vids.forEach(v => {
-      if (!prevIds.has(v.id) && !seenIds.has(v.id)) { v.isNew = true; newVids.push(v); seenIds.add(v.id); }
-      if (!allVideos.find(x=>x.id===v.id)) allVideos.push(v);
-    });
+  if(!channels.length) return;
+  setStatus('업데이트 중...',true);
+  const prevIds=new Set(allVideos.map(v=>v.id));
+  const newVids=[];
+  for(const ch of channels){
+    try{
+      const vids=await getVideos(ch.id);
+      allVideos=allVideos.filter(v=>v.channelId!==ch.id);
+      vids.forEach(v=>{
+        if(!prevIds.has(v.id)&&!seenIds.has(v.id)){v.isNew=true;newVids.push(v);seenIds.add(v.id);}
+        if(!allVideos.find(x=>x.id===v.id))allVideos.push(v);
+      });
+    }catch(e){console.error(ch.name,e);}
   }
-
-  if (newVids.length) notify(newVids);
-  save();
-  renderChannels();
-  renderVideos();
-  const now = new Date();
-  document.getElementById('lastUpdated').textContent =
-    `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')} 업데이트`;
-  setStatus(isMonitoring ? '모니터링 중' : '업데이트 완료', isMonitoring);
+  if(newVids.length) notify(newVids);
+  save(); renderVideos();
+  const now=new Date();
+  document.getElementById('lastUpdated').textContent=`${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')} 업데이트`;
+  setStatus(isMonitoring?'모니터링 중':'업데이트 완료',isMonitoring);
 }
 
 function notify(vids) {
-  const b = document.getElementById('notifBanner');
-  b.textContent = `새 영상 ${vids.length}개: ${vids.slice(0,2).map(v=>v.title).join(' / ')}${vids.length>2?' 외':''}`;
+  const b=document.getElementById('notifBanner');
+  b.textContent=`새 영상 ${vids.length}개: ${vids.slice(0,2).map(v=>v.title).join(' / ')}${vids.length>2?' 외':''}`;
   b.classList.add('show');
-  setTimeout(() => b.classList.remove('show'), 8000);
-  if (Notification.permission === 'granted') {
-    vids.slice(0,3).forEach(v => new Notification(`새 영상 · ${v.channelName}`, { body: v.title, icon: v.thumb }));
-  } else if (Notification.permission !== 'denied') {
-    Notification.requestPermission();
-  }
+  setTimeout(()=>b.classList.remove('show'),8000);
+  if(Notification.permission==='granted') vids.slice(0,3).forEach(v=>new Notification(`새 영상 · ${v.channelName}`,{body:v.title,icon:v.thumb}));
+  else if(Notification.permission!=='denied') Notification.requestPermission();
 }
 
 function toggleMonitor() {
-  const btn = document.getElementById('monitorBtn');
-  if (isMonitoring) {
-    clearInterval(monitorInterval);
-    isMonitoring = false;
-    btn.textContent = '모니터링 시작';
-    btn.classList.remove('active');
-    setStatus('대기 중', false);
+  const btn=document.getElementById('monitorBtn');
+  if(isMonitoring){
+    clearInterval(monitorInterval); isMonitoring=false;
+    btn.textContent='모니터링 시작'; btn.classList.remove('active');
+    setStatus('대기 중',false);
   } else {
-    if (!channels.length) { alert('먼저 채널을 추가해주세요.'); return; }
-    isMonitoring = true;
-    btn.textContent = '모니터링 중지';
-    btn.classList.add('active');
+    if(!channels.length){alert('먼저 채널을 추가해주세요.');return;}
+    isMonitoring=true; btn.textContent='모니터링 중지'; btn.classList.add('active');
     fetchAll();
-    const min = parseInt(document.getElementById('intervalSelect').value);
-    if (min > 0) monitorInterval = setInterval(fetchAll, min * 60 * 1000);
+    const min=parseInt(document.getElementById('intervalSelect').value);
+    if(min>0) monitorInterval=setInterval(fetchAll,min*60*1000);
   }
 }
 
-function switchTab(tab, el) {
-  currentTab = tab;
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  renderVideos();
+function switchTab(tab,el) {
+  currentTab=tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active'); renderVideos();
 }
 
-function setStatus(text, live) {
-  document.getElementById('statusText').textContent = text;
-  document.getElementById('statusDot').className = 'status-dot' + (live ? ' live' : '');
+function setStatus(text,live) {
+  document.getElementById('statusText').textContent=text;
+  document.getElementById('statusDot').className='status-dot'+(live?' live':'');
 }
 
-document.getElementById('kwInput').addEventListener('keydown', e => { if (e.key === 'Enter') addKeyword(); });
-document.getElementById('channelInput').addEventListener('keydown', e => { if (e.key === 'Enter') addChannel(); });
+document.getElementById('kwInput').addEventListener('keydown',e=>{if(e.key==='Enter')addKeyword();});
+document.getElementById('channelInput').addEventListener('keydown',e=>{if(e.key==='Enter')addChannel();});
 
-// Init: load saved channels
-(async () => {
-  renderChannels();
-  renderKeywords();
-  renderVideos();
-  if (channels.length) {
-    setStatus('저장된 채널 로딩 중...', true);
-    for (const ch of channels) {
-      const vids = await fetchFeed(ch.id);
-      if (vids.length) { ch.name = vids[0].channelName; vids.forEach(v => { seenIds.add(v.id); if (!allVideos.find(x=>x.id===v.id)) allVideos.push(v); }); }
+(async()=>{
+  renderChannels(); renderKeywords(); renderVideos();
+  if(channels.length){
+    setStatus('저장된 채널 로딩 중...',true);
+    for(const ch of channels){
+      try{
+        const vids=await getVideos(ch.id);
+        vids.forEach(v=>{seenIds.add(v.id);if(!allVideos.find(x=>x.id===v.id))allVideos.push(v);});
+      }catch(e){}
     }
-    save();
-    renderChannels();
-    renderVideos();
-    setStatus('로딩 완료', false);
+    save(); renderVideos(); setStatus('로딩 완료',false);
   }
 })();
 </script>
