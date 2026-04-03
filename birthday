@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>생일 롤링페이퍼 🎂</title>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream:#fdf8f0; --warm:#f5ede0; --gold:#c9a84c; --gold2:#e8c96a;
+  --brown:#6b4c2a; --brown2:#8b6340; --text:#3a2a1a; --text2:#7a6555;
+  --text3:#b09a88; --border:rgba(139,99,64,0.15); --shadow:rgba(107,76,42,0.12);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle at 20% 20%,rgba(201,168,76,0.06) 0%,transparent 50%),radial-gradient(circle at 80% 80%,rgba(201,168,76,0.06) 0%,transparent 50%);pointer-events:none;z-index:0;}
+.page{position:relative;z-index:1;}
+
+/* 로딩 */
+.loading{display:flex;align-items:center;justify-content:center;min-height:100vh;font-size:14px;color:var(--text3);}
+
+/* 관리자 바 */
+.admin-bar{background:var(--brown);color:#fff;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;font-size:13px;position:sticky;top:0;z-index:90;}
+.admin-badge{background:var(--gold);color:var(--brown);font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-right:8px;}
+.admin-btns{display:flex;gap:8px;flex-wrap:wrap;}
+.admin-btn{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:5px;color:#fff;cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-size:12px;padding:6px 12px;}
+.admin-btn:hover{background:rgba(255,255,255,0.2);}
+
+/* 설정 패널 */
+.settings-panel{background:var(--warm);border-bottom:1px solid var(--border);padding:20px 24px;display:none;}
+.settings-panel.open{display:block;}
+.settings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;max-width:800px;}
+.settings-group{display:flex;flex-direction:column;gap:6px;}
+.settings-label{font-size:11px;color:var(--text2);font-weight:500;}
+.settings-input{background:#fff;border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:13px;padding:8px 10px;outline:none;width:100%;}
+.settings-input:focus{border-color:var(--gold);}
+.settings-save{margin-top:12px;background:var(--gold);border:none;border-radius:5px;color:#fff;cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:500;padding:8px 20px;}
+
+/* 링크 박스 */
+.link-box{background:var(--warm);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin:16px 24px;}
+.link-box-title{font-size:12px;color:var(--text2);margin-bottom:10px;font-weight:500;}
+.link-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+.link-row:last-child{margin-bottom:0;}
+.link-label{font-size:11px;color:var(--text3);width:70px;flex-shrink:0;}
+.link-url{flex:1;background:#fff;border:1px solid var(--border);border-radius:5px;color:var(--text2);font-size:11px;padding:6px 10px;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.link-copy{background:transparent;border:1px solid var(--border);border-radius:5px;color:var(--text2);cursor:pointer;font-size:11px;padding:6px 10px;white-space:nowrap;}
+.link-copy:hover{background:var(--gold);border-color:var(--gold);color:#fff;}
+
+/* 히어로 */
+.hero{text-align:center;padding:60px 24px 40px;}
+.hero-deco{font-size:24px;letter-spacing:12px;color:var(--gold);margin-bottom:24px;opacity:0.7;}
+.photo-frame{width:160px;height:160px;border-radius:50%;border:3px solid var(--gold);margin:0 auto 24px;overflow:hidden;background:var(--warm);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 6px rgba(201,168,76,0.1),0 8px 32px var(--shadow);cursor:pointer;}
+.photo-frame img{width:100%;height:100%;object-fit:cover;}
+.photo-placeholder{display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--text3);font-size:12px;}
+.photo-upload-input{display:none;}
+.hero-name{font-family:'Nanum Myeongjo',serif;font-size:32px;font-weight:700;color:var(--brown);margin-bottom:8px;}
+.hero-msg{font-size:15px;color:var(--text2);line-height:1.8;max-width:480px;margin:0 auto 12px;font-weight:300;}
+.hero-date{font-size:12px;color:var(--text3);letter-spacing:0.1em;}
+.divider{width:80px;height:1px;background:linear-gradient(to right,transparent,var(--gold),transparent);margin:28px auto;}
+
+/* 편지 그리드 */
+.letters-section{padding:0 24px 100px;max-width:900px;margin:0 auto;}
+.letters-title{text-align:center;font-family:'Nanum Myeongjo',serif;font-size:18px;color:var(--brown2);margin-bottom:32px;letter-spacing:0.1em;}
+.letters-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:16px;}
+
+/* 봉투 */
+.envelope-wrap{position:relative;}
+.envelope{cursor:pointer;transition:transform 0.2s;}
+.envelope:hover{transform:translateY(-4px) scale(1.02);}
+.envelope-body{background:var(--warm);border:1px solid var(--border);border-radius:4px 4px 0 0;padding:28px 16px 18px;text-align:center;box-shadow:0 4px 16px var(--shadow);min-height:130px;position:relative;overflow:hidden;}
+.envelope-body::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(to right,var(--gold),var(--gold2),var(--gold));}
+.envelope-seal{width:34px;height:34px;border-radius:50%;background:var(--gold);border:2px solid var(--gold2);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:16px;box-shadow:0 2px 8px rgba(201,168,76,0.3);}
+.envelope-from{font-size:13px;font-weight:500;color:var(--brown);margin-bottom:4px;}
+.envelope-preview{font-size:11px;color:var(--text3);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.envelope-flap{width:100%;height:0;border-left:50% solid transparent;border-right:50% solid transparent;border-top:32px solid #ede5d8;}
+.delete-btn{position:absolute;top:8px;right:8px;background:rgba(200,50,50,0.08);border:1px solid rgba(200,50,50,0.2);border-radius:4px;color:#c06060;cursor:pointer;font-size:11px;padding:3px 7px;opacity:0;transition:opacity 0.15s;z-index:2;}
+.envelope-wrap:hover .delete-btn{opacity:1;}
+
+/* 빈 상태 */
+.empty-letters{text-align:center;padding:60px 24px;color:var(--text3);grid-column:1/-1;}
+.empty-letters p{font-size:14px;margin-top:8px;}
+
+/* 읽기 모달 */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(58,42,26,0.5);z-index:100;align-items:center;justify-content:center;padding:24px;}
+.modal-bg.open{display:flex;}
+.modal{background:#fffdf8;border-radius:8px;padding:40px 36px;max-width:480px;width:100%;position:relative;box-shadow:0 20px 60px rgba(58,42,26,0.25);border:1px solid var(--border);max-height:80vh;overflow-y:auto;animation:modalIn 0.25s ease;}
+@keyframes modalIn{from{opacity:0;transform:scale(0.95) translateY(10px);}to{opacity:1;transform:scale(1) translateY(0);}}
+.modal-close{position:absolute;top:16px;right:20px;background:none;border:none;font-size:22px;cursor:pointer;color:var(--text3);}
+.modal-close:hover{color:var(--text);}
+.modal-seal{width:48px;height:48px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 16px;box-shadow:0 4px 12px rgba(201,168,76,0.3);}
+.modal-from-label{text-align:center;font-size:12px;color:var(--text3);margin-bottom:2px;}
+.modal-name{text-align:center;font-family:'Nanum Myeongjo',serif;font-size:20px;color:var(--brown);margin-bottom:20px;}
+.modal-divider{width:40px;height:1px;background:var(--gold);margin:0 auto 20px;}
+.modal-body{font-size:14px;line-height:2;color:var(--text);white-space:pre-wrap;font-weight:300;}
+.modal-date{text-align:right;font-size:11px;color:var(--text3);margin-top:20px;}
+
+/* 쓰기 FAB */
+.write-fab{position:fixed;bottom:32px;right:32px;background:var(--gold);border:none;border-radius:50px;color:#fff;cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:500;padding:14px 24px;box-shadow:0 4px 20px rgba(201,168,76,0.4);display:flex;align-items:center;gap:8px;transition:all 0.2s;z-index:50;}
+.write-fab:hover{background:var(--brown2);transform:translateY(-2px);}
+
+/* 쓰기 모달 */
+.write-modal{background:#fffdf8;border-radius:8px;padding:36px;max-width:500px;width:100%;box-shadow:0 20px 60px rgba(58,42,26,0.25);border:1px solid var(--border);animation:modalIn 0.25s ease;}
+.write-modal h3{font-family:'Nanum Myeongjo',serif;font-size:20px;color:var(--brown);text-align:center;margin-bottom:24px;}
+.form-group{margin-bottom:16px;}
+.form-label{font-size:12px;color:var(--text2);margin-bottom:6px;display:block;}
+.form-input,.form-textarea{width:100%;background:var(--cream);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:14px;padding:10px 12px;outline:none;transition:border-color 0.15s;}
+.form-input:focus,.form-textarea:focus{border-color:var(--gold);}
+.form-textarea{resize:vertical;min-height:140px;line-height:1.8;}
+.emoji-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.emoji-btn{background:var(--warm);border:1px solid var(--border);border-radius:20px;cursor:pointer;font-size:18px;padding:4px 10px;transition:all 0.1s;}
+.emoji-btn:hover,.emoji-btn.selected{background:var(--gold);border-color:var(--gold);}
+.form-btns{display:flex;gap:8px;margin-top:20px;}
+.btn-submit{flex:1;background:var(--gold);border:none;border-radius:6px;color:#fff;cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:500;padding:12px;transition:all 0.15s;}
+.btn-submit:hover{background:var(--brown2);}
+.btn-submit:disabled{opacity:0.6;cursor:not-allowed;}
+.btn-cancel{background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--text2);cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-size:14px;padding:12px 20px;}
+
+/* 토스트 */
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--brown);color:#fff;font-size:13px;padding:10px 20px;border-radius:20px;opacity:0;transition:all 0.3s;z-index:200;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+@media(max-width:600px){
+  .letters-grid{grid-template-columns:repeat(2,1fr);}
+  .modal,.write-modal{padding:28px 20px;}
+  .hero-name{font-size:26px;}
+  .admin-btns{gap:4px;}
+  .admin-btn{font-size:11px;padding:5px 8px;}
+}
+</style>
+</head>
+<body>
+
+<div id="app"><div class="loading">불러오는 중...</div></div>
+
+<!-- 읽기 모달 -->
+<div class="modal-bg" id="readModal" onclick="closeReadModal(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeReadModal()">×</button>
+    <div class="modal-seal" id="modalEmoji">💌</div>
+    <div class="modal-from-label">From</div>
+    <div class="modal-name" id="modalFrom"></div>
+    <div class="modal-divider"></div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-date" id="modalDate"></div>
+  </div>
+</div>
+
+<!-- 쓰기 모달 -->
+<div class="modal-bg" id="writeModal" onclick="closeWriteModal(event)">
+  <div class="write-modal">
+    <h3>✉ 축하 편지 쓰기</h3>
+    <div class="form-group">
+      <label class="form-label">보내는 분</label>
+      <input class="form-input" type="text" id="writerName" placeholder="이름 또는 닉네임" maxlength="20"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">봉투 이모지</label>
+      <div class="emoji-row" id="emojiRow"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">축하 메시지</label>
+      <textarea class="form-textarea" id="writerMsg" placeholder="생일을 축하하는 마음을 담아 편지를 써주세요 :)"></textarea>
+    </div>
+    <div class="form-btns">
+      <button class="btn-cancel" onclick="closeWriteModal()">취소</button>
+      <button class="btn-submit" id="submitBtn" onclick="submitLetter()">편지 보내기 💌</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, deleteDoc, orderBy, query } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDDyRxHF4-7vmRwuBdZVgIl5D7wXDa7Qag",
+  authDomain: "happy-birthday-ch.firebaseapp.com",
+  projectId: "happy-birthday-ch",
+  storageBucket: "happy-birthday-ch.firebasestorage.app",
+  messagingSenderId: "466279772788",
+  appId: "1:466279772788:web:bd0fd6ec0daba4aa9fd721"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const EMOJIS = ['🌸','🎂','🎁','💐','🌹','✨','🎉','🥂','💛','🌻','🍀','🦋'];
+const params = new URLSearchParams(location.search);
+const MODE = params.get('mode') === 'admin' ? 'admin' : 'guest';
+const BASE_URL = location.origin + location.pathname;
+
+let selectedEmoji = EMOJIS[0];
+let letters = [];
+let profile = { name:'생일자', msg:'오늘 하루도 당신의 생일을\n함께 축하할 수 있어서 행복해요.\n따뜻한 마음을 가득 담아 보냅니다.', date: new Date().toISOString().slice(0,10), photo: null };
+
+async function loadProfile() {
+  const snap = await getDoc(doc(db, 'birthday', 'profile'));
+  if (snap.exists()) profile = { ...profile, ...snap.data() };
+}
+
+async function saveProfile() {
+  await setDoc(doc(db, 'birthday', 'profile'), profile);
+}
+
+async function loadLetters() {
+  const q = query(collection(db, 'letters'), orderBy('createdAt', 'desc'));
+  const snap = await getDocs(q);
+  letters = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+async function addLetter(letter) {
+  await addDoc(collection(db, 'letters'), { ...letter, createdAt: Date.now() });
+}
+
+async function deleteLetter(id) {
+  await deleteDoc(doc(db, 'letters', id));
+}
+
+async function init() {
+  await Promise.all([loadProfile(), loadLetters()]);
+  render();
+  if (params.get('mode') === 'write') setTimeout(openWriteModal, 500);
+}
+
+function render() {
+  const app = document.getElementById('app');
+  app.innerHTML = '';
+  if (MODE === 'admin') renderAdminBar(app);
+  renderHero(app);
+  renderLetters(app);
+  if (MODE !== 'admin') {
+    const fab = document.createElement('button');
+    fab.className = 'write-fab';
+    fab.innerHTML = '✉ 축하 편지 쓰기';
+    fab.onclick = openWriteModal;
+    app.appendChild(fab);
+  }
+}
+
+function renderAdminBar(app) {
+  const bar = document.createElement('div');
+  bar.className = 'admin-bar';
+  bar.innerHTML = `
+    <div style="display:flex;align-items:center;">
+      <span class="admin-badge">관리자</span>생일 롤링페이퍼
+    </div>
+    <div class="admin-btns">
+      <button class="admin-btn" onclick="toggleSettings()">⚙ 설정</button>
+      <button class="admin-btn" onclick="copyLink('guest')">🔗 생일자 링크</button>
+      <button class="admin-btn" onclick="copyLink('write')">✉ 편지쓰기 링크</button>
+    </div>
+  `;
+  app.appendChild(bar);
+
+  const settings = document.createElement('div');
+  settings.className = 'settings-panel';
+  settings.id = 'settingsPanel';
+  settings.innerHTML = `
+    <div class="settings-grid">
+      <div class="settings-group">
+        <label class="settings-label">생일자 이름</label>
+        <input class="settings-input" id="setName" value="${profile.name}" />
+      </div>
+      <div class="settings-group">
+        <label class="settings-label">생일 날짜</label>
+        <input class="settings-input" id="setDate" type="date" value="${profile.date}" />
+      </div>
+      <div class="settings-group" style="grid-column:1/-1;">
+        <label class="settings-label">대표 축하문구</label>
+        <textarea class="settings-input" id="setMsg" rows="3" style="resize:vertical;">${profile.msg}</textarea>
+      </div>
+      <div class="settings-group">
+        <label class="settings-label">생일자 사진 (URL)</label>
+        <input class="settings-input" id="setPhoto" placeholder="이미지 URL 붙여넣기" value="${profile.photo||''}" />
+      </div>
+    </div>
+    <button class="settings-save" onclick="saveSettings()">저장하기</button>
+  `;
+  app.appendChild(settings);
+
+  const linkBox = document.createElement('div');
+  linkBox.className = 'link-box';
+  linkBox.innerHTML = `
+    <div class="link-box-title">공유 링크</div>
+    <div class="link-row">
+      <span class="link-label">생일자용</span>
+      <span class="link-url">${BASE_URL}</span>
+      <button class="link-copy" onclick="copyLink('guest')">복사</button>
+    </div>
+    <div class="link-row">
+      <span class="link-label">편지쓰기</span>
+      <span class="link-url">${BASE_URL}?mode=write</span>
+      <button class="link-copy" onclick="copyLink('write')">복사</button>
+    </div>
+    <div class="link-row">
+      <span class="link-label">관리자</span>
+      <span class="link-url">${BASE_URL}?mode=admin</span>
+      <button class="link-copy" onclick="copyLink('admin')">복사</button>
+    </div>
+  `;
+  app.appendChild(linkBox);
+}
+
+function renderHero(app) {
+  const hero = document.createElement('div');
+  hero.className = 'hero';
+  hero.innerHTML = `
+    <div class="hero-deco">✦ ✦ ✦</div>
+    <div class="photo-frame">
+      ${profile.photo
+        ? `<img src="${profile.photo}" alt="생일자 사진" />`
+        : `<div class="photo-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>${MODE==='admin'?'URL로 사진 추가':''}  </div>`}
+    </div>
+    <div class="hero-name">${profile.name}</div>
+    <div class="hero-msg">${profile.msg.replace(/\n/g,'<br>')}</div>
+    <div class="hero-date">Happy Birthday · ${profile.date}</div>
+    <div class="divider"></div>
+  `;
+  app.appendChild(hero);
+}
+
+function renderLetters(app) {
+  const section = document.createElement('div');
+  section.className = 'letters-section';
+  section.innerHTML = `<div class="letters-title">✦ 축하 편지 ${letters.length}통 ✦</div>`;
+  const grid = document.createElement('div');
+  grid.className = 'letters-grid';
+
+  if (!letters.length) {
+    grid.innerHTML = `<div class="empty-letters">💌<p>아직 편지가 없어요.<br>첫 번째 편지를 보내주세요!</p></div>`;
+  } else {
+    letters.forEach((letter, i) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'envelope-wrap';
+      wrap.innerHTML = `
+        ${MODE==='admin' ? `<button class="delete-btn" onclick="handleDelete('${letter.id}')">삭제</button>` : ''}
+        <div class="envelope" onclick="openLetter(${i})">
+          <div class="envelope-body">
+            <div class="envelope-seal">${letter.emoji||'💌'}</div>
+            <div class="envelope-from">${letter.from}</div>
+            <div class="envelope-preview">${letter.msg}</div>
+          </div>
+          <div class="envelope-flap"></div>
+        </div>
+      `;
+      grid.appendChild(wrap);
+    });
+  }
+  section.appendChild(grid);
+  app.appendChild(section);
+}
+
+window.toggleSettings = () => document.getElementById('settingsPanel')?.classList.toggle('open');
+
+window.saveSettings = async () => {
+  profile.name = document.getElementById('setName').value.trim() || profile.name;
+  profile.date = document.getElementById('setDate').value || profile.date;
+  profile.msg = document.getElementById('setMsg').value.trim() || profile.msg;
+  profile.photo = document.getElementById('setPhoto').value.trim() || null;
+  await saveProfile();
+  render();
+  showToast('저장됐어요!');
+};
+
+window.openLetter = (i) => {
+  const l = letters[i];
+  document.getElementById('modalEmoji').textContent = l.emoji||'💌';
+  document.getElementById('modalFrom').textContent = l.from;
+  document.getElementById('modalBody').textContent = l.msg;
+  document.getElementById('modalDate').textContent = new Date(l.createdAt).toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('readModal').classList.add('open');
+};
+
+window.closeReadModal = (e) => {
+  if (!e || e.target===document.getElementById('readModal'))
+    document.getElementById('readModal').classList.remove('open');
+};
+
+window.openWriteModal = () => {
+  document.getElementById('emojiRow').innerHTML = EMOJIS.map(e =>
+    `<button class="emoji-btn ${e===selectedEmoji?'selected':''}" onclick="selectEmoji('${e}',this)">${e}</button>`
+  ).join('');
+  document.getElementById('writeModal').classList.add('open');
+};
+
+window.closeWriteModal = (e) => {
+  if (!e || e.target===document.getElementById('writeModal'))
+    document.getElementById('writeModal').classList.remove('open');
+};
+
+window.selectEmoji = (emoji, btn) => {
+  selectedEmoji = emoji;
+  document.querySelectorAll('.emoji-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+};
+
+window.submitLetter = async () => {
+  const from = document.getElementById('writerName').value.trim();
+  const msg = document.getElementById('writerMsg').value.trim();
+  if (!from) { showToast('이름을 입력해주세요'); return; }
+  if (!msg) { showToast('메시지를 입력해주세요'); return; }
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = '전송 중...';
+  await addLetter({ from, msg, emoji: selectedEmoji });
+  await loadLetters();
+  closeWriteModal();
+  document.getElementById('writerName').value = '';
+  document.getElementById('writerMsg').value = '';
+  btn.disabled = false; btn.textContent = '편지 보내기 💌';
+  render();
+  showToast('편지가 전달됐어요 💌');
+};
+
+window.handleDelete = async (id) => {
+  if (!confirm('이 편지를 삭제할까요?')) return;
+  await deleteLetter(id);
+  await loadLetters();
+  render();
+  showToast('삭제됐어요');
+};
+
+window.copyLink = (type) => {
+  let url = BASE_URL;
+  if (type === 'write') url += '?mode=write';
+  if (type === 'admin') url += '?mode=admin';
+  navigator.clipboard.writeText(url).then(() => showToast('링크가 복사됐어요!'));
+};
+
+window.showToast = (msg) => {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+};
+
+init();
+</script>
+</body>
+</html>
