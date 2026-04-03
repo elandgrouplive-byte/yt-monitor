@@ -273,8 +273,9 @@ function renderAdminBar(app) {
         <textarea class="settings-input" id="setMsg" rows="3" style="resize:vertical;">${profile.msg}</textarea>
       </div>
       <div class="settings-group">
-        <label class="settings-label">생일자 사진 (URL)</label>
-        <input class="settings-input" id="setPhoto" placeholder="이미지 URL 붙여넣기" value="${profile.photo||''}" />
+        <label class="settings-label">생일자 사진</label>
+        <input type="file" id="setPhotoFile" accept="image/*" style="font-size:13px;padding:4px 0;" onchange="previewPhoto(this)" />
+        <div id="photoStatus" style="font-size:11px;color:var(--text3);margin-top:4px;">${profile.photo ? '사진 등록됨 ✓' : '사진 없음'}</div>
       </div>
     </div>
     <button class="settings-save" onclick="saveSettings()">저장하기</button>
@@ -355,14 +356,40 @@ function renderLetters(app) {
 
 window.toggleSettings = () => document.getElementById('settingsPanel')?.classList.toggle('open');
 
+window.previewPhoto = (input) => {
+  const file = input.files[0];
+  if (!file) return;
+  const status = document.getElementById('photoStatus');
+  if (file.size > 1024 * 1024) {
+    if (status) status.textContent = '⚠ 1MB 이하 이미지를 사용해주세요';
+    input.value = '';
+    return;
+  }
+  if (status) status.textContent = `${file.name} 선택됨`;
+};
+
 window.saveSettings = async () => {
   profile.name = document.getElementById('setName').value.trim() || profile.name;
   profile.date = document.getElementById('setDate').value || profile.date;
   profile.msg = document.getElementById('setMsg').value.trim() || profile.msg;
-  profile.photo = document.getElementById('setPhoto').value.trim() || null;
-  await saveProfile();
-  render();
-  showToast('저장됐어요!');
+
+  const fileInput = document.getElementById('setPhotoFile');
+  const file = fileInput?.files[0];
+
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      profile.photo = e.target.result;
+      await saveProfile();
+      render();
+      showToast('저장됐어요!');
+    };
+    reader.readAsDataURL(file);
+  } else {
+    await saveProfile();
+    render();
+    showToast('저장됐어요!');
+  }
 };
 
 window.openLetter = (i) => {
