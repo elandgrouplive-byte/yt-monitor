@@ -154,6 +154,10 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
       <input class="form-input" type="text" id="writerName" placeholder="이름 또는 닉네임" maxlength="20"/>
     </div>
     <div class="form-group">
+      <label class="form-label">비밀번호 (4자리) — 내 편지를 나중에 확인할 때 사용해요</label>
+      <input class="form-input" type="password" id="writerPw" placeholder="숫자 또는 문자 4자리" maxlength="4" style="letter-spacing:0.3em;font-size:18px;"/>
+    </div>
+    <div class="form-group">
       <label class="form-label">봉투 이모지</label>
       <div class="emoji-row" id="emojiRow"></div>
     </div>
@@ -164,6 +168,25 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
     <div class="form-btns">
       <button class="btn-cancel" onclick="closeWriteModal()">취소</button>
       <button class="btn-submit" id="submitBtn" onclick="submitLetter()">편지 보내기 💌</button>
+    </div>
+  </div>
+</div>
+
+<!-- 내 편지 확인 모달 -->
+<div class="modal-bg" id="myLetterModal" onclick="closeMyLetterModal(event)">
+  <div class="write-modal">
+    <h3>🔐 내 편지 확인</h3>
+    <div class="form-group">
+      <label class="form-label">이름</label>
+      <input class="form-input" type="text" id="checkName" placeholder="편지 작성 시 입력한 이름" maxlength="20"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">비밀번호 (4자리)</label>
+      <input class="form-input" type="password" id="checkPw" placeholder="설정한 비밀번호 4자리" maxlength="4" style="letter-spacing:0.3em;font-size:18px;"/>
+    </div>
+    <div class="form-btns">
+      <button class="btn-cancel" onclick="closeMyLetterModal()">취소</button>
+      <button class="btn-submit" onclick="checkMyLetter()">확인하기</button>
     </div>
   </div>
 </div>
@@ -189,7 +212,7 @@ const db = getFirestore(app);
 
 const EMOJIS = ['🌸','🎂','🎁','💐','🌹','✨','🎉','🥂','💛','🌻','🍀','🦋'];
 const params = new URLSearchParams(location.search);
-const MODE = params.get('mode') === 'admin' ? 'admin' : 'guest';
+const MODE = params.get('mode') === 'admin' ? 'admin' : params.get('mode') === 'write' ? 'write' : 'guest';
 const BASE_URL = location.origin + location.pathname;
 
 let selectedEmoji = EMOJIS[0];
@@ -230,14 +253,32 @@ function render() {
   app.innerHTML = '';
   if (MODE === 'admin') renderAdminBar(app);
   renderHero(app);
-  renderLetters(app);
-  if (MODE !== 'admin') {
+  if (MODE === 'write') {
+    renderWriteOnly(app);
+  } else {
+    renderLetters(app);
+  }
+  if (MODE === 'guest' || MODE === 'write') {
     const fab = document.createElement('button');
     fab.className = 'write-fab';
     fab.innerHTML = '✉ 축하 편지 쓰기';
     fab.onclick = openWriteModal;
     app.appendChild(fab);
   }
+}
+
+function renderWriteOnly(app) {
+  const section = document.createElement('div');
+  section.className = 'letters-section';
+  section.innerHTML = `
+    <div style="text-align:center;padding:40px 24px;color:var(--text3);">
+      <div style="font-size:40px;margin-bottom:16px;">💌</div>
+      <div style="font-family:'Nanum Myeongjo',serif;font-size:18px;color:var(--brown2);margin-bottom:8px;">축하 편지를 보내주세요</div>
+      <div style="font-size:13px;line-height:1.8;margin-bottom:24px;">아래 버튼을 눌러 생일자에게<br>따뜻한 마음을 전해보세요</div>
+      <button onclick="openMyLetterModal()" style="background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--text2);cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-size:13px;padding:10px 20px;">🔐 내가 쓴 편지 확인</button>
+    </div>
+  `;
+  app.appendChild(section);
 }
 
 function renderAdminBar(app) {
@@ -342,7 +383,7 @@ function renderLetters(app) {
           <div class="envelope-body">
             <div class="envelope-seal">${letter.emoji||'💌'}</div>
             <div class="envelope-from">${letter.from}</div>
-            <div class="envelope-preview">${letter.msg}</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:4px;">편지를 열어보세요</div>
           </div>
           <div class="envelope-flap"></div>
         </div>
@@ -426,19 +467,42 @@ window.selectEmoji = (emoji, btn) => {
 
 window.submitLetter = async () => {
   const from = document.getElementById('writerName').value.trim();
+  const pw = document.getElementById('writerPw').value.trim();
   const msg = document.getElementById('writerMsg').value.trim();
   if (!from) { showToast('이름을 입력해주세요'); return; }
+  if (pw.length !== 4) { showToast('비밀번호는 4자리로 입력해주세요'); return; }
   if (!msg) { showToast('메시지를 입력해주세요'); return; }
   const btn = document.getElementById('submitBtn');
   btn.disabled = true; btn.textContent = '전송 중...';
-  await addLetter({ from, msg, emoji: selectedEmoji });
+  await addLetter({ from, msg, emoji: selectedEmoji, pw });
   await loadLetters();
   closeWriteModal();
   document.getElementById('writerName').value = '';
+  document.getElementById('writerPw').value = '';
   document.getElementById('writerMsg').value = '';
   btn.disabled = false; btn.textContent = '편지 보내기 💌';
   render();
   showToast('편지가 전달됐어요 💌');
+};
+
+window.openMyLetterModal = () => {
+  document.getElementById('myLetterModal').classList.add('open');
+};
+
+window.closeMyLetterModal = (e) => {
+  if (!e || e.target===document.getElementById('myLetterModal'))
+    document.getElementById('myLetterModal').classList.remove('open');
+};
+
+window.checkMyLetter = () => {
+  const name = document.getElementById('checkName').value.trim();
+  const pw = document.getElementById('checkPw').value.trim();
+  if (!name || pw.length !== 4) { showToast('이름과 4자리 비밀번호를 입력해주세요'); return; }
+  const found = letters.find(l => l.from === name && l.pw === pw);
+  if (!found) { showToast('일치하는 편지가 없어요'); return; }
+  closeMyLetterModal();
+  const i = letters.indexOf(found);
+  openLetter(i);
 };
 
 window.handleDelete = async (id) => {
