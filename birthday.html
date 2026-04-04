@@ -270,11 +270,29 @@ function render() {
 function renderWriteOnly(app) {
   const section = document.createElement('div');
   section.className = 'letters-section';
+
+  let envelopes = '';
+  if (!letters.length) {
+    envelopes = `<div class="empty-letters">💌<p>아직 편지가 없어요.<br>첫 번째 편지를 보내주세요!</p></div>`;
+  } else {
+    envelopes = letters.map(l => `
+      <div class="envelope-wrap">
+        <div class="envelope" style="cursor:default;">
+          <div class="envelope-body">
+            <div class="envelope-seal">${l.emoji||'💌'}</div>
+            <div class="envelope-from">${l.from}</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:4px;">🔒 내용은 비공개예요</div>
+          </div>
+          <div class="envelope-flap"></div>
+        </div>
+      </div>
+    `).join('');
+  }
+
   section.innerHTML = `
-    <div style="text-align:center;padding:40px 24px;color:var(--text3);">
-      <div style="font-size:40px;margin-bottom:16px;">💌</div>
-      <div style="font-family:'Nanum Myeongjo',serif;font-size:18px;color:var(--brown2);margin-bottom:8px;">축하 편지를 보내주세요</div>
-      <div style="font-size:13px;line-height:1.8;margin-bottom:24px;">아래 버튼을 눌러 생일자에게<br>따뜻한 마음을 전해보세요</div>
+    <div class="letters-title">✦ 축하 편지 ${letters.length}통 ✦</div>
+    <div class="letters-grid">${envelopes}</div>
+    <div style="text-align:center;margin-top:32px;">
       <button onclick="openMyLetterModal()" style="background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--text2);cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-size:13px;padding:10px 20px;">🔐 내가 쓴 편지 확인</button>
     </div>
   `;
