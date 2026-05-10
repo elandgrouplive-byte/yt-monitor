@@ -142,6 +142,29 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
     <div class="modal-divider"></div>
     <div class="modal-body" id="modalBody"></div>
     <div class="modal-date" id="modalDate"></div>
+    <div id="myLetterBtns" style="display:none;margin-top:20px;display:none;gap:8px;flex-wrap:wrap;">
+      <button onclick="openEditModal()" style="flex:1;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--text2);cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-size:13px;padding:10px;">✏️ 수정</button>
+      <button onclick="deleteMyLetter()" style="flex:1;background:transparent;border:1px solid rgba(200,50,50,0.3);border-radius:6px;color:#c06060;cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-size:13px;padding:10px;">🗑 삭제</button>
+    </div>
+  </div>
+</div>
+
+<!-- 편지 수정 모달 -->
+<div class="modal-bg" id="editModal" onclick="closeEditModal(event)">
+  <div class="write-modal">
+    <h3>✏️ 편지 수정</h3>
+    <div class="form-group">
+      <label class="form-label">봉투 이모지</label>
+      <div class="emoji-row" id="editEmojiRow"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">축하 메시지</label>
+      <textarea class="form-textarea" id="editMsg"></textarea>
+    </div>
+    <div class="form-btns">
+      <button class="btn-cancel" onclick="closeEditModal()">취소</button>
+      <button class="btn-submit" id="editBtn" onclick="submitEdit()">수정 완료</button>
+    </div>
   </div>
 </div>
 
@@ -258,7 +281,7 @@ function render() {
   } else {
     renderLetters(app);
   }
-  if (MODE === 'guest' || MODE === 'write') {
+  if (MODE === 'write') {
     const fab = document.createElement('button');
     fab.className = 'write-fab';
     fab.innerHTML = '✉ 축하 편지 쓰기';
@@ -451,15 +474,6 @@ window.saveSettings = async () => {
   }
 };
 
-window.openLetter = (i) => {
-  const l = letters[i];
-  document.getElementById('modalEmoji').textContent = l.emoji||'💌';
-  document.getElementById('modalFrom').textContent = l.from;
-  document.getElementById('modalBody').textContent = l.msg;
-  document.getElementById('modalDate').textContent = new Date(l.createdAt).toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});
-  document.getElementById('readModal').classList.add('open');
-};
-
 window.closeReadModal = (e) => {
   if (!e || e.target===document.getElementById('readModal'))
     document.getElementById('readModal').classList.remove('open');
@@ -512,15 +526,83 @@ window.closeMyLetterModal = (e) => {
     document.getElementById('myLetterModal').classList.remove('open');
 };
 
+let myLetterId = null;
+let myLetterEmoji = EMOJIS[0];
+
 window.checkMyLetter = () => {
   const name = document.getElementById('checkName').value.trim();
   const pw = document.getElementById('checkPw').value.trim();
   if (!name || pw.length !== 4) { showToast('이름과 4자리 비밀번호를 입력해주세요'); return; }
   const found = letters.find(l => l.from === name && l.pw === pw);
   if (!found) { showToast('일치하는 편지가 없어요'); return; }
+  myLetterId = found.id;
+  myLetterEmoji = found.emoji || EMOJIS[0];
   closeMyLetterModal();
   const i = letters.indexOf(found);
-  openLetter(i);
+  openLetter(i, true);
+};
+
+window.openLetter = (i, isOwner = false) => {
+  const l = letters[i];
+  document.getElementById('modalEmoji').textContent = l.emoji||'💌';
+  document.getElementById('modalFrom').textContent = l.from;
+  document.getElementById('modalBody').textContent = l.msg;
+  document.getElementById('modalDate').textContent = new Date(l.createdAt).toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});
+  const btns = document.getElementById('myLetterBtns');
+  if (isOwner || MODE === 'admin') {
+    btns.style.display = 'flex';
+    if (!isOwner && MODE === 'admin') myLetterId = l.id;
+  } else {
+    btns.style.display = 'none';
+  }
+  document.getElementById('readModal').classList.add('open');
+};
+
+window.openEditModal = () => {
+  const letter = letters.find(l => l.id === myLetterId);
+  if (!letter) return;
+  myLetterEmoji = letter.emoji || EMOJIS[0];
+  document.getElementById('editEmojiRow').innerHTML = EMOJIS.map(e =>
+    `<button class="emoji-btn ${e===myLetterEmoji?'selected':''}" onclick="selectEditEmoji('${e}',this)">${e}</button>`
+  ).join('');
+  document.getElementById('editMsg').value = letter.msg;
+  document.getElementById('readModal').classList.remove('open');
+  document.getElementById('editModal').classList.add('open');
+};
+
+window.closeEditModal = (e) => {
+  if (!e || e.target===document.getElementById('editModal'))
+    document.getElementById('editModal').classList.remove('open');
+};
+
+window.selectEditEmoji = (emoji, btn) => {
+  myLetterEmoji = emoji;
+  document.querySelectorAll('#editEmojiRow .emoji-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+};
+
+window.submitEdit = async () => {
+  const msg = document.getElementById('editMsg').value.trim();
+  if (!msg) { showToast('메시지를 입력해주세요'); return; }
+  const btn = document.getElementById('editBtn');
+  btn.disabled = true; btn.textContent = '수정 중...';
+  const letter = letters.find(l => l.id === myLetterId);
+  await setDoc(doc(db, 'letters2', myLetterId), { ...letter, msg, emoji: myLetterEmoji });
+  await loadLetters();
+  closeEditModal();
+  btn.disabled = false; btn.textContent = '수정 완료';
+  render();
+  showToast('편지가 수정됐어요!');
+};
+
+window.deleteMyLetter = async () => {
+  if (!confirm('편지를 삭제할까요?')) return;
+  await deleteLetter(myLetterId);
+  await loadLetters();
+  document.getElementById('readModal').classList.remove('open');
+  myLetterId = null;
+  render();
+  showToast('편지가 삭제됐어요');
 };
 
 window.handleDelete = async (id) => {
