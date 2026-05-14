@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>스승의 날 롤링페이퍼 🎓</title>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#0f1729;--warm:#1a2540;--pk:#c9a84c;--pv:#1e3060;--pv2:#c9a84c;
+  --text:#f0e6c8;--text2:#b8a882;--text3:#6e6448;
+  --border:rgba(201,168,76,0.2);--shadow:rgba(201,168,76,0.1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Sans KR',sans-serif;background:#0d1526;color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* 꽃 배경 */
+.flower-bg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.flower-bg svg{position:absolute;}
+
+.page{position:relative;z-index:1;}
+.loading{display:flex;align-items:center;justify-content:center;min-height:100vh;font-size:14px;color:var(--text3);}
+
+/* 관리자 바 */
+.admin-bar{background:linear-gradient(135deg,#7b3fa0,#c2649a);color:#fff;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;font-size:13px;position:sticky;top:0;z-index:90;}
+.admin-badge{background:rgba(255,255,255,0.25);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-right:8px;}
+.admin-btns{display:flex;gap:8px;flex-wrap:wrap;}
+.admin-btn{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);border-radius:5px;color:#fff;cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-size:12px;padding:6px 12px;}
+.admin-btn:hover{background:rgba(255,255,255,0.25);}
+
+/* 설정 패널 */
+.settings-panel{background:#1a2540;border-bottom:1px solid var(--border);padding:20px 24px;display:none;}
+.settings-panel.open{display:block;}
+.settings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;max-width:800px;}
+.settings-group{display:flex;flex-direction:column;gap:6px;}
+.settings-label{font-size:11px;color:var(--text2);font-weight:500;}
+.settings-input{background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:13px;padding:8px 10px;outline:none;width:100%;}
+.settings-input:focus{border-color:var(--pv);}
+.settings-save{margin-top:12px;background:linear-gradient(135deg,var(--pv),var(--pk));border:none;border-radius:5px;color:#fff;cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:500;padding:8px 20px;}
+
+/* 링크 박스 */
+.link-box{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin:16px 24px;}
+.link-box-title{font-size:12px;color:var(--text2);margin-bottom:10px;font-weight:500;}
+.link-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+.link-row:last-child{margin-bottom:0;}
+.link-label{font-size:11px;color:var(--text3);width:70px;flex-shrink:0;}
+.link-url{flex:1;background:#fff;border:1px solid var(--border);border-radius:5px;color:var(--text2);font-size:11px;padding:6px 10px;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.link-copy{background:transparent;border:1px solid var(--border);border-radius:5px;color:var(--text2);cursor:pointer;font-size:11px;padding:6px 10px;white-space:nowrap;}
+.link-copy:hover{background:var(--pv);border-color:var(--pv);color:#fff;}
+
+/* 히어로 */
+.hero{text-align:center;padding:70px 24px 40px;position:relative;}
+.hero-flowers{display:flex;justify-content:center;gap:8px;margin-bottom:20px;font-size:22px;letter-spacing:4px;opacity:0.85;}
+.photo-wrap{position:relative;width:180px;margin:0 auto 28px;}
+.photo-ring{position:absolute;inset:-10px;border-radius:50%;border:1px dashed rgba(201,168,76,0.4);animation:spin 20s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.photo-frame{width:180px;height:180px;border-radius:50%;border:3px solid #c9a84c;overflow:hidden;background:var(--warm);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 8px rgba(201,168,76,0.08),0 8px 36px rgba(201,168,76,0.15);position:relative;z-index:1;}
+.photo-frame img{width:100%;height:100%;object-fit:cover;}
+.photo-placeholder{display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--text3);font-size:12px;}
+.hero-name{font-family:'Nanum Myeongjo',serif;font-size:34px;font-weight:700;color:var(--pv);margin-bottom:10px;letter-spacing:0.04em;}
+.hero-msg{font-size:15px;color:var(--text2);line-height:1.9;max-width:480px;margin:0 auto 14px;font-weight:300;}
+.hero-date{font-size:12px;color:var(--text3);letter-spacing:0.12em;}
+.divider{display:flex;align-items:center;justify-content:center;gap:10px;margin:28px auto;color:var(--pv2);font-size:14px;opacity:0.7;}
+.divider::before,.divider::after{content:'';flex:1;max-width:80px;height:1px;background:linear-gradient(to right,transparent,var(--pv2));}
+.divider::after{background:linear-gradient(to left,transparent,var(--pv2));}
+
+/* 편지 그리드 */
+.letters-section{padding:0 24px 100px;max-width:920px;margin:0 auto;}
+.letters-title{text-align:center;font-family:'Nanum Myeongjo',serif;font-size:18px;color:var(--pv);margin-bottom:32px;letter-spacing:0.08em;}
+.letters-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:18px;}
+
+/* 봉투 */
+.envelope-wrap{position:relative;}
+.envelope{cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;}
+.envelope:hover{transform:translateY(-6px);filter:brightness(1.03);}
+.envelope-body{background:linear-gradient(160deg,#1a2540,#0f1729);border:1px solid rgba(201,168,76,0.2);border-radius:12px 12px 0 0;padding:28px 16px 18px;text-align:center;box-shadow:0 6px 20px rgba(155,77,202,0.1);min-height:140px;position:relative;overflow:hidden;}
+.envelope-corner{position:absolute;top:0;left:0;right:0;height:40px;overflow:hidden;}
+.envelope-corner::before{content:'';position:absolute;top:-20px;left:50%;transform:translateX(-50%);width:120%;height:60px;background:rgba(201,168,76,0.08);clip-path:polygon(0 0,100% 0,50% 100%);}
+.envelope-petals{position:absolute;top:6px;left:0;right:0;display:flex;justify-content:center;gap:3px;font-size:11px;}
+.envelope-seal{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--pv),var(--pk));border:3px solid rgba(255,255,255,0.6);display:flex;align-items:center;justify-content:center;margin:4px auto 10px;font-size:17px;box-shadow:0 3px 10px rgba(155,77,202,0.3);}
+.envelope-from{font-size:13px;font-weight:500;color:var(--pv);margin-bottom:4px;}
+.envelope-locked{font-size:11px;color:var(--text3);margin-top:4px;}
+.envelope-flap{width:100%;height:0;border-left:50% solid transparent;border-right:50% solid transparent;border-top:36px solid rgba(30,48,96,0.9);filter:drop-shadow(0 -1px 2px rgba(201,168,76,0.15));}
+.delete-btn{position:absolute;top:8px;right:8px;background:rgba(200,50,50,0.08);border:1px solid rgba(200,50,50,0.2);border-radius:4px;color:#c06060;cursor:pointer;font-size:11px;padding:3px 7px;opacity:0;transition:opacity 0.15s;z-index:2;}
+.envelope-wrap:hover .delete-btn{opacity:1;}
+
+/* 빈 상태 */
+.empty-letters{text-align:center;padding:60px 24px;color:var(--text3);grid-column:1/-1;}
+.empty-letters p{font-size:14px;margin-top:8px;}
+
+/* 모달 */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(5,10,20,0.75);z-index:100;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px);}
+.modal-bg.open{display:flex;}
+.modal{background:linear-gradient(160deg,#13203a,#0f1729);border-radius:20px;padding:40px 36px;max-width:480px;width:100%;position:relative;box-shadow:0 24px 64px rgba(100,30,160,0.18);border:1px solid rgba(192,132,224,0.25);max-height:80vh;overflow-y:auto;animation:modalIn 0.25s ease;}
+@keyframes modalIn{from{opacity:0;transform:scale(0.95) translateY(10px);}to{opacity:1;transform:scale(1) translateY(0);}}
+.modal-close{position:absolute;top:16px;right:20px;background:none;border:none;font-size:22px;cursor:pointer;color:var(--text3);}
+.modal-close:hover{color:var(--text);}
+.modal-flowers{text-align:center;font-size:20px;letter-spacing:6px;margin-bottom:8px;opacity:0.7;}
+.modal-seal{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--pv),var(--pk));display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 12px;box-shadow:0 4px 16px rgba(155,77,202,0.3);border:3px solid rgba(255,255,255,0.5);}
+.modal-from-label{text-align:center;font-size:12px;color:var(--text3);margin-bottom:2px;}
+.modal-name{text-align:center;font-family:'Nanum Myeongjo',serif;font-size:22px;color:var(--pv);margin-bottom:16px;}
+.modal-divider{display:flex;align-items:center;justify-content:center;gap:6px;margin:0 auto 20px;color:var(--pv2);font-size:12px;opacity:0.7;}
+.modal-divider::before,.modal-divider::after{content:'';width:30px;height:1px;background:var(--pv2);}
+.modal-body{font-size:14px;line-height:2.1;color:var(--text);white-space:pre-wrap;font-weight:300;}
+.modal-date{text-align:right;font-size:11px;color:var(--text3);margin-top:20px;}
+
+/* 쓰기 FAB */
+.write-fab{position:fixed;bottom:32px;right:32px;background:linear-gradient(135deg,var(--pv),var(--pk));border:none;border-radius:50px;color:#fff;cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:500;padding:14px 24px;box-shadow:0 4px 20px rgba(155,77,202,0.4);display:flex;align-items:center;gap:8px;transition:all 0.2s;z-index:50;}
+.write-fab:hover{opacity:0.9;transform:translateY(-2px);}
+
+/* 쓰기 모달 */
+.write-modal{background:linear-gradient(160deg,#13203a,#0f1729);border-radius:20px;padding:36px;max-width:500px;width:100%;box-shadow:0 24px 64px rgba(100,30,160,0.18);border:1px solid rgba(192,132,224,0.25);animation:modalIn 0.25s ease;}
+.write-modal h3{font-family:'Nanum Myeongjo',serif;font-size:20px;color:var(--pv);text-align:center;margin-bottom:24px;}
+.form-group{margin-bottom:16px;}
+.form-label{font-size:12px;color:var(--text2);margin-bottom:6px;display:block;}
+.form-input,.form-textarea{width:100%;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:14px;padding:10px 12px;outline:none;transition:border-color 0.15s;}
+.form-input:focus,.form-textarea:focus{border-color:var(--pv);}
+.form-textarea{resize:vertical;min-height:140px;line-height:1.8;}
+.emoji-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.emoji-btn{background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:20px;cursor:pointer;font-size:18px;padding:4px 10px;transition:all 0.1s;}
+.emoji-btn:hover,.emoji-btn.selected{background:var(--pv);border-color:var(--pv);}
+.form-btns{display:flex;gap:8px;margin-top:20px;}
+.btn-submit{flex:1;background:linear-gradient(135deg,var(--pv),var(--pk));border:none;border-radius:8px;color:#fff;cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:500;padding:12px;transition:all 0.15s;}
+.btn-submit:hover{opacity:0.9;}
+.btn-submit:disabled{opacity:0.6;cursor:not-allowed;}
+.btn-cancel{background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text2);cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-size:14px;padding:12px 20px;}
+
+/* 토스트 */
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);background:linear-gradient(135deg,var(--pv),var(--pk));color:#fff;font-size:13px;padding:10px 20px;border-radius:20px;opacity:0;transition:all 0.3s;z-index:200;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+@media(max-width:600px){
+  .letters-grid{grid-template-columns:repeat(2,1fr);}
+  .modal,.write-modal{padding:28px 20px;border-radius:16px;}
+  .hero-name{font-size:28px;}
+  .admin-btns{gap:4px;}
+  .admin-btn{font-size:11px;padding:5px 8px;}
+}
+</style>
+</head>
+<body>
+
+<div class="flower-bg">
+  <!-- 카네이션 좌상단 -->
+  <svg style="top:60px;left:20px;width:100px;opacity:0.55;" viewBox="0 0 60 80">
+    <defs>
+  <g id="carnation">
+    <ellipse cx="0" cy="-18" rx="10" ry="7" fill="#c0392b" opacity="0.9"/>
+    <ellipse cx="-9" cy="-12" rx="9" ry="6" fill="#e74c3c" opacity="0.85"/>
+    <ellipse cx="9" cy="-12" rx="9" ry="6" fill="#c0392b" opacity="0.85"/>
+    <ellipse cx="-14" cy="-4" rx="8" ry="6" fill="#e74c3c" opacity="0.8"/>
+    <ellipse cx="14" cy="-4" rx="8" ry="6" fill="#c0392b" opacity="0.8"/>
+    <ellipse cx="-8" cy="4" rx="9" ry="6" fill="#e74c3c" opacity="0.75"/>
+    <ellipse cx="8" cy="4" rx="9" ry="6" fill="#c0392b" opacity="0.75"/>
+    <ellipse cx="0" cy="8" rx="10" ry="6" fill="#e74c3c" opacity="0.7"/>
+    <path d="M0,14 Q-3,30 -2,50" stroke="#2d6a2d" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M-2,28 Q-12,22 -16,16" stroke="#2d6a2d" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <path d="M-1,36 Q8,30 12,24" stroke="#2d6a2d" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+  </g>
+</defs>
+    <use href="#carnation" transform="translate(30,18) scale(1.1)"/>
+  </svg>
+  <!-- 카네이션 우상단 -->
+  <svg style="top:50px;right:24px;width:90px;opacity:0.5;" viewBox="0 0 60 80">
+    <defs><g id="c2"><ellipse cx="0" cy="-18" rx="10" ry="7" fill="#a93226" opacity="0.9"/><ellipse cx="-9" cy="-12" rx="9" ry="6" fill="#cd6155" opacity="0.85"/><ellipse cx="9" cy="-12" rx="9" ry="6" fill="#a93226" opacity="0.85"/><ellipse cx="-14" cy="-4" rx="8" ry="6" fill="#cd6155" opacity="0.8"/><ellipse cx="14" cy="-4" rx="8" ry="6" fill="#a93226" opacity="0.8"/><ellipse cx="-8" cy="4" rx="9" ry="6" fill="#cd6155" opacity="0.75"/><ellipse cx="8" cy="4" rx="9" ry="6" fill="#a93226" opacity="0.75"/><ellipse cx="0" cy="8" rx="10" ry="6" fill="#cd6155" opacity="0.7"/><path d="M0,14 Q3,30 2,50" stroke="#2d6a2d" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M2,28 Q12,22 16,16" stroke="#2d6a2d" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M1,36 Q-8,30 -12,24" stroke="#2d6a2d" stroke-width="1.8" fill="none" stroke-linecap="round"/></g></defs>
+    <use href="#c2" transform="translate(30,18) scale(1.0)"/>
+  </svg>
+  <!-- 카네이션 좌하단 -->
+  <svg style="bottom:80px;left:16px;width:80px;opacity:0.4;" viewBox="0 0 60 80">
+    <defs><g id="c3"><ellipse cx="0" cy="-18" rx="10" ry="7" fill="#c0392b" opacity="0.9"/><ellipse cx="-9" cy="-12" rx="9" ry="6" fill="#e74c3c" opacity="0.85"/><ellipse cx="9" cy="-12" rx="9" ry="6" fill="#c0392b" opacity="0.85"/><ellipse cx="-14" cy="-4" rx="8" ry="6" fill="#e74c3c" opacity="0.8"/><ellipse cx="14" cy="-4" rx="8" ry="6" fill="#c0392b" opacity="0.8"/><ellipse cx="0" cy="8" rx="10" ry="6" fill="#e74c3c" opacity="0.7"/><path d="M0,14 Q-2,30 -1,50" stroke="#2d6a2d" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M-1,30 Q-10,24 -14,18" stroke="#2d6a2d" stroke-width="1.8" fill="none" stroke-linecap="round"/></g></defs>
+    <use href="#c3" transform="translate(30,18) scale(0.9)"/>
+  </svg>
+  <!-- 카네이션 우하단 -->
+  <svg style="bottom:60px;right:20px;width:85px;opacity:0.4;" viewBox="0 0 60 80">
+    <defs><g id="c4"><ellipse cx="0" cy="-18" rx="10" ry="7" fill="#922b21" opacity="0.9"/><ellipse cx="-9" cy="-12" rx="9" ry="6" fill="#c0392b" opacity="0.85"/><ellipse cx="9" cy="-12" rx="9" ry="6" fill="#922b21" opacity="0.85"/><ellipse cx="-14" cy="-4" rx="8" ry="6" fill="#c0392b" opacity="0.8"/><ellipse cx="14" cy="-4" rx="8" ry="6" fill="#922b21" opacity="0.8"/><ellipse cx="0" cy="8" rx="10" ry="6" fill="#c0392b" opacity="0.7"/><path d="M0,14 Q2,30 1,50" stroke="#1e5c1e" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M1,30 Q10,24 14,18" stroke="#1e5c1e" stroke-width="1.8" fill="none" stroke-linecap="round"/></g></defs>
+    <use href="#c4" transform="translate(30,18) scale(0.95)"/>
+  </svg>
+  <!-- 골드 기하 장식 (유지) -->
+  <svg style="top:-60px;left:-60px;width:340px;opacity:0.04;" viewBox="0 0 200 200"><g transform="translate(100,100)"><circle r="80" fill="none" stroke="#c9a84c" stroke-width="0.5"/><circle r="60" fill="none" stroke="#c9a84c" stroke-width="0.5"/><circle r="40" fill="none" stroke="#c9a84c" stroke-width="0.5"/><line x1="-80" y1="0" x2="80" y2="0" stroke="#c9a84c" stroke-width="0.3"/><line x1="0" y1="-80" x2="0" y2="80" stroke="#c9a84c" stroke-width="0.3"/></g></svg>
+  <svg style="bottom:3%;right:5%;width:260px;opacity:0.04;" viewBox="0 0 200 200"><g transform="translate(100,100)"><circle r="75" fill="none" stroke="#c9a84c" stroke-width="0.5"/><circle r="50" fill="none" stroke="#c9a84c" stroke-width="0.4"/><line x1="-75" y1="0" x2="75" y2="0" stroke="#c9a84c" stroke-width="0.3"/><line x1="0" y1="-75" x2="0" y2="75" stroke="#c9a84c" stroke-width="0.3"/></g></svg>
+</div>
+
+<div id="app"><div class="loading">불러오는 중...</div></div>
+
+<!-- 읽기 모달 -->
+<div class="modal-bg" id="readModal" onclick="closeReadModal(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeReadModal()">×</button>
+    <div class="modal-flowers" id="modalFlowers">🌸 🌷 🌺</div>
+    <div class="modal-seal" id="modalEmoji">💌</div>
+    <div class="modal-from-label">From</div>
+    <div class="modal-name" id="modalFrom"></div>
+    <div class="modal-divider">🌸</div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-date" id="modalDate"></div>
+    <div id="myLetterBtns" style="display:none;margin-top:20px;display:none;gap:8px;flex-wrap:wrap;">
+      <button onclick="openEditModal()" style="flex:1;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--text2);cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-size:13px;padding:10px;">✏️ 수정</button>
+      <button onclick="deleteMyLetter()" style="flex:1;background:transparent;border:1px solid rgba(200,50,50,0.3);border-radius:6px;color:#c06060;cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-size:13px;padding:10px;">🗑 삭제</button>
+    </div>
+  </div>
+</div>
+
+<!-- 편지 수정 모달 -->
+<div class="modal-bg" id="editModal" onclick="closeEditModal(event)">
+  <div class="write-modal">
+    <h3>✏️ 편지 수정</h3>
+    <div class="form-group">
+      <label class="form-label">봉투 이모지</label>
+      <div class="emoji-row" id="editEmojiRow"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">축하 메시지</label>
+      <textarea class="form-textarea" id="editMsg"></textarea>
+    </div>
+    <div class="form-btns">
+      <button class="btn-cancel" onclick="closeEditModal()">취소</button>
+      <button class="btn-submit" id="editBtn" onclick="submitEdit()">수정 완료</button>
+    </div>
+  </div>
+</div>
+
+<!-- 쓰기 모달 -->
+<div class="modal-bg" id="writeModal" onclick="closeWriteModal(event)">
+  <div class="write-modal">
+    <h3>✉ 감사 편지 쓰기</h3>
+    <div class="form-group">
+      <label class="form-label">보내는 분</label>
+      <input class="form-input" type="text" id="writerName" placeholder="이름 또는 닉네임" maxlength="20"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">비밀번호 (4자리) — 내 편지를 나중에 확인할 때 사용해요</label>
+      <input class="form-input" type="password" id="writerPw" placeholder="숫자 또는 문자 4자리" maxlength="4" style="letter-spacing:0.3em;font-size:18px;"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">봉투 이모지</label>
+      <div class="emoji-row" id="emojiRow"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">축하 메시지</label>
+      <textarea class="form-textarea" id="writerMsg" placeholder="스승님께 감사한 마음을 담아 편지를 써주세요 :)"></textarea>
+    </div>
+    <div class="form-btns">
+      <button class="btn-cancel" onclick="closeWriteModal()">취소</button>
+      <button class="btn-submit" id="submitBtn" onclick="submitLetter()">편지 보내기 💌</button>
+    </div>
+  </div>
+</div>
+
+<!-- 내 편지 확인 모달 -->
+<div class="modal-bg" id="myLetterModal" onclick="closeMyLetterModal(event)">
+  <div class="write-modal">
+    <h3>🔐 내 편지 확인</h3>
+    <div class="form-group">
+      <label class="form-label">이름</label>
+      <input class="form-input" type="text" id="checkName" placeholder="편지 작성 시 입력한 이름" maxlength="20"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">비밀번호 (4자리)</label>
+      <input class="form-input" type="password" id="checkPw" placeholder="설정한 비밀번호 4자리" maxlength="4" style="letter-spacing:0.3em;font-size:18px;"/>
+    </div>
+    <div class="form-btns">
+      <button class="btn-cancel" onclick="closeMyLetterModal()">취소</button>
+      <button class="btn-submit" onclick="checkMyLetter()">확인하기</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, deleteDoc, orderBy, query } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDDyRxHF4-7vmRwuBdZVgIl5D7wXDa7Qag",
+  authDomain: "happy-birthday-ch.firebaseapp.com",
+  projectId: "happy-birthday-ch",
+  storageBucket: "happy-birthday-ch.firebasestorage.app",
+  messagingSenderId: "466279772788",
+  appId: "1:466279772788:web:bd0fd6ec0daba4aa9fd721"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const EMOJIS = ['🌸','🎂','🎁','💐','🌹','✨','🎉','🥂','💛','🌻','🍀','🦋'];
+const params = new URLSearchParams(location.search);
+const MODE = params.get('mode') === 'admin' ? 'admin' : params.get('mode') === 'write' ? 'write' : 'guest';
+const BASE_URL = location.origin + location.pathname;
+
+let selectedEmoji = EMOJIS[0];
+let letters = [];
+let profile = { name:'본부장님', msg:'스승의 날을 맞아\n언제나 가르침을 주시는 본부장님께\n진심 어린 감사의 마음을 전합니다.', date: new Date().toISOString().slice(0,10), photo: null };
+
+async function loadProfile() {
+  const snap = await getDoc(doc(db, 'teacher', 'profile'));
+  if (snap.exists()) profile = { ...profile, ...snap.data() };
+}
+
+async function saveProfile() {
+  await setDoc(doc(db, 'teacher', 'profile'), profile);
+}
+
+async function loadLetters() {
+  const q = query(collection(db, 'letters_teacher'), orderBy('createdAt', 'desc'));
+  const snap = await getDocs(q);
+  letters = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+async function addLetter(letter) {
+  await addDoc(collection(db, 'letters_teacher'), { ...letter, createdAt: Date.now() });
+}
+
+async function deleteLetter(id) {
+  await deleteDoc(doc(db, 'letters_teacher', id));
+}
+
+async function init() {
+  await Promise.all([loadProfile(), loadLetters()]);
+  render();
+  if (params.get('mode') === 'write') setTimeout(openWriteModal, 500);
+}
+
+function render() {
+  const app = document.getElementById('app');
+  app.innerHTML = '';
+  if (MODE === 'admin') renderAdminBar(app);
+  renderHero(app);
+  if (MODE === 'write') {
+    renderWriteOnly(app);
+  } else {
+    renderLetters(app);
+  }
+  if (MODE === 'write') {
+    const fab = document.createElement('button');
+    fab.className = 'write-fab';
+    fab.innerHTML = '✉ 감사 편지 쓰기';
+    fab.onclick = openWriteModal;
+    app.appendChild(fab);
+  }
+}
+
+function renderWriteOnly(app) {
+  const section = document.createElement('div');
+  section.className = 'letters-section';
+
+  let envelopes = '';
+  if (!letters.length) {
+    envelopes = `<div class="empty-letters">💌<p>아직 편지가 없어요.<br>첫 번째 감사 편지를 보내주세요!</p></div>`;
+  } else {
+    envelopes = letters.map(l => `
+      <div class="envelope-wrap">
+        <div class="envelope" style="cursor:default;">
+          <div class="envelope-body">
+            <div class="envelope-corner"></div>
+            <div class="envelope-petals">🌹 ✨ 🌹</div>
+            <div class="envelope-seal">${l.emoji||'💌'}</div>
+            <div class="envelope-from">${l.from}</div>
+            <div class="envelope-locked">✉ 내용은 비공개예요</div>
+          </div>
+          <div class="envelope-flap"></div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  section.innerHTML = `
+    <div class="letters-title">✦ 축하 편지 ${letters.length}통 ✦</div>
+    <div class="letters-grid">${envelopes}</div>
+    <div style="text-align:center;margin-top:32px;">
+      <button onclick="openMyLetterModal()" style="background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--text2);cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-size:13px;padding:10px 20px;">🔐 내가 쓴 편지 확인</button>
+    </div>
+  `;
+  app.appendChild(section);
+}
+
+function renderAdminBar(app) {
+  const bar = document.createElement('div');
+  bar.className = 'admin-bar';
+  bar.innerHTML = `
+    <div style="display:flex;align-items:center;">
+      <span class="admin-badge">관리자</span>생일 롤링페이퍼
+    </div>
+    <div class="admin-btns">
+      <button class="admin-btn" onclick="toggleSettings()">⚙ 설정</button>
+      <button class="admin-btn" onclick="copyLink('guest')">🔗 생일자 링크</button>
+      <button class="admin-btn" onclick="copyLink('write')">✉ 편지쓰기 링크</button>
+    </div>
+  `;
+  app.appendChild(bar);
+
+  const settings = document.createElement('div');
+  settings.className = 'settings-panel';
+  settings.id = 'settingsPanel';
+  settings.innerHTML = `
+    <div class="settings-grid">
+      <div class="settings-group">
+        <label class="settings-label">생일자 이름</label>
+        <input class="settings-input" id="setName" value="${profile.name}" />
+      </div>
+      <div class="settings-group">
+        <label class="settings-label">생일 날짜</label>
+        <input class="settings-input" id="setDate" type="date" value="${profile.date}" />
+      </div>
+      <div class="settings-group" style="grid-column:1/-1;">
+        <label class="settings-label">대표 축하문구</label>
+        <textarea class="settings-input" id="setMsg" rows="3" style="resize:vertical;">${profile.msg}</textarea>
+      </div>
+      <div class="settings-group">
+        <label class="settings-label">생일자 사진</label>
+        <input type="file" id="setPhotoFile" accept="image/*" style="font-size:13px;padding:4px 0;" onchange="previewPhoto(this)" />
+        <div id="photoStatus" style="font-size:11px;color:var(--text3);margin-top:4px;">${profile.photo ? '사진 등록됨 ✓' : '사진 없음'}</div>
+      </div>
+    </div>
+    <button class="settings-save" onclick="saveSettings()">저장하기</button>
+  `;
+  app.appendChild(settings);
+
+  const linkBox = document.createElement('div');
+  linkBox.className = 'link-box';
+  linkBox.innerHTML = `
+    <div class="link-box-title">공유 링크</div>
+    <div class="link-row">
+      <span class="link-label">생일자용</span>
+      <span class="link-url">${BASE_URL}</span>
+      <button class="link-copy" onclick="copyLink('guest')">복사</button>
+    </div>
+    <div class="link-row">
+      <span class="link-label">편지쓰기</span>
+      <span class="link-url">${BASE_URL}?mode=write</span>
+      <button class="link-copy" onclick="copyLink('write')">복사</button>
+    </div>
+    <div class="link-row">
+      <span class="link-label">관리자</span>
+      <span class="link-url">${BASE_URL}?mode=admin</span>
+      <button class="link-copy" onclick="copyLink('admin')">복사</button>
+    </div>
+  `;
+  app.appendChild(linkBox);
+}
+
+function renderHero(app) {
+  const hero = document.createElement('div');
+  hero.className = 'hero';
+  hero.innerHTML = `
+    <div class="hero-flowers">🌹 🎓 🌹 🎓 🌹</div>
+    <div class="photo-wrap">
+      <div class="photo-ring"></div>
+      <div class="photo-frame">
+        ${profile.photo
+          ? `<img src="${profile.photo}" alt="생일자 사진" />`
+          : `<div class="photo-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="36" height="36"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>${MODE==='admin'?'사진 추가':''}</div>`}
+      </div>
+    </div>
+    <div class="hero-name">${profile.name}</div>
+    <div class="hero-msg">${profile.msg.replace(/\n/g,'<br>')}</div>
+    <div class="hero-date">🎓 스승의 날 · ${profile.date}</div>
+    <div class="divider">✦</div>
+  `;
+  app.appendChild(hero);
+}
+
+function renderLetters(app) {
+  const section = document.createElement('div');
+  section.className = 'letters-section';
+  section.innerHTML = `<div class="letters-title">✦ 축하 편지 ${letters.length}통 ✦</div>`;
+  const grid = document.createElement('div');
+  grid.className = 'letters-grid';
+
+  if (!letters.length) {
+    grid.innerHTML = `<div class="empty-letters">💌<p>아직 편지가 없어요.<br>첫 번째 감사 편지를 보내주세요!</p></div>`;
+  } else {
+    letters.forEach((letter, i) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'envelope-wrap';
+      wrap.innerHTML = `
+        ${MODE==='admin' ? `<button class="delete-btn" onclick="handleDelete('${letter.id}')">삭제</button>` : ''}
+        <div class="envelope" onclick="openLetter(${i})">
+          <div class="envelope-body">
+            <div class="envelope-corner"></div>
+            <div class="envelope-petals">🌹 ✨ 🌹</div>
+            <div class="envelope-seal">${letter.emoji||'💌'}</div>
+            <div class="envelope-from">${letter.from}</div>
+            <div class="envelope-locked">✉ 열어보세요</div>
+          </div>
+          <div class="envelope-flap"></div>
+        </div>
+      `;
+      grid.appendChild(wrap);
+    });
+  }
+  section.appendChild(grid);
+  app.appendChild(section);
+}
+
+window.toggleSettings = () => document.getElementById('settingsPanel')?.classList.toggle('open');
+
+window.previewPhoto = (input) => {
+  const file = input.files[0];
+  if (!file) return;
+  const status = document.getElementById('photoStatus');
+  if (file.size > 1024 * 1024) {
+    if (status) status.textContent = '⚠ 1MB 이하 이미지를 사용해주세요';
+    input.value = '';
+    return;
+  }
+  if (status) status.textContent = `${file.name} 선택됨`;
+};
+
+window.saveSettings = async () => {
+  profile.name = document.getElementById('setName').value.trim() || profile.name;
+  profile.date = document.getElementById('setDate').value || profile.date;
+  profile.msg = document.getElementById('setMsg').value.trim() || profile.msg;
+
+  const fileInput = document.getElementById('setPhotoFile');
+  const file = fileInput?.files[0];
+
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      profile.photo = e.target.result;
+      await saveProfile();
+      render();
+      showToast('저장됐어요!');
+    };
+    reader.readAsDataURL(file);
+  } else {
+    await saveProfile();
+    render();
+    showToast('저장됐어요!');
+  }
+};
+
+window.closeReadModal = (e) => {
+  if (!e || e.target===document.getElementById('readModal'))
+    document.getElementById('readModal').classList.remove('open');
+};
+
+window.openWriteModal = () => {
+  document.getElementById('emojiRow').innerHTML = EMOJIS.map(e =>
+    `<button class="emoji-btn ${e===selectedEmoji?'selected':''}" onclick="selectEmoji('${e}',this)">${e}</button>`
+  ).join('');
+  document.getElementById('writeModal').classList.add('open');
+};
+
+window.closeWriteModal = (e) => {
+  if (!e || e.target===document.getElementById('writeModal'))
+    document.getElementById('writeModal').classList.remove('open');
+};
+
+window.selectEmoji = (emoji, btn) => {
+  selectedEmoji = emoji;
+  document.querySelectorAll('.emoji-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+};
+
+window.submitLetter = async () => {
+  const from = document.getElementById('writerName').value.trim();
+  const pw = document.getElementById('writerPw').value.trim();
+  const msg = document.getElementById('writerMsg').value.trim();
+  if (!from) { showToast('이름을 입력해주세요'); return; }
+  if (pw.length !== 4) { showToast('비밀번호는 4자리로 입력해주세요'); return; }
+  if (!msg) { showToast('메시지를 입력해주세요'); return; }
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = '전송 중...';
+  await addLetter({ from, msg, emoji: selectedEmoji, pw });
+  await loadLetters();
+  closeWriteModal();
+  document.getElementById('writerName').value = '';
+  document.getElementById('writerPw').value = '';
+  document.getElementById('writerMsg').value = '';
+  btn.disabled = false; btn.textContent = '편지 보내기 💌';
+  render();
+  showToast('편지가 전달됐어요 💌');
+};
+
+window.openMyLetterModal = () => {
+  document.getElementById('myLetterModal').classList.add('open');
+};
+
+window.closeMyLetterModal = (e) => {
+  if (!e || e.target===document.getElementById('myLetterModal'))
+    document.getElementById('myLetterModal').classList.remove('open');
+};
+
+let myLetterId = null;
+let myLetterEmoji = EMOJIS[0];
+
+window.checkMyLetter = () => {
+  const name = document.getElementById('checkName').value.trim();
+  const pw = document.getElementById('checkPw').value.trim();
+  if (!name || pw.length !== 4) { showToast('이름과 4자리 비밀번호를 입력해주세요'); return; }
+  const found = letters.find(l => l.from === name && l.pw === pw);
+  if (!found) { showToast('일치하는 편지가 없어요'); return; }
+  myLetterId = found.id;
+  myLetterEmoji = found.emoji || EMOJIS[0];
+  closeMyLetterModal();
+  const i = letters.indexOf(found);
+  openLetter(i, true);
+};
+
+window.openLetter = (i, isOwner = false) => {
+  const l = letters[i];
+  document.getElementById('modalEmoji').textContent = l.emoji||'💌';
+  document.getElementById('modalFrom').textContent = l.from;
+  document.getElementById('modalFlowers').textContent = '🌹 🎓 🌹';
+  document.getElementById('modalBody').textContent = l.msg;
+  document.getElementById('modalDate').textContent = new Date(l.createdAt).toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});
+  const btns = document.getElementById('myLetterBtns');
+  if (isOwner || MODE === 'admin') {
+    btns.style.display = 'flex';
+    if (!isOwner && MODE === 'admin') myLetterId = l.id;
+  } else {
+    btns.style.display = 'none';
+  }
+  document.getElementById('readModal').classList.add('open');
+};
+
+window.openEditModal = () => {
+  const letter = letters.find(l => l.id === myLetterId);
+  if (!letter) return;
+  myLetterEmoji = letter.emoji || EMOJIS[0];
+  document.getElementById('editEmojiRow').innerHTML = EMOJIS.map(e =>
+    `<button class="emoji-btn ${e===myLetterEmoji?'selected':''}" onclick="selectEditEmoji('${e}',this)">${e}</button>`
+  ).join('');
+  document.getElementById('editMsg').value = letter.msg;
+  document.getElementById('readModal').classList.remove('open');
+  document.getElementById('editModal').classList.add('open');
+};
+
+window.closeEditModal = (e) => {
+  if (!e || e.target===document.getElementById('editModal'))
+    document.getElementById('editModal').classList.remove('open');
+};
+
+window.selectEditEmoji = (emoji, btn) => {
+  myLetterEmoji = emoji;
+  document.querySelectorAll('#editEmojiRow .emoji-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+};
+
+window.submitEdit = async () => {
+  const msg = document.getElementById('editMsg').value.trim();
+  if (!msg) { showToast('메시지를 입력해주세요'); return; }
+  const btn = document.getElementById('editBtn');
+  btn.disabled = true; btn.textContent = '수정 중...';
+  const letter = letters.find(l => l.id === myLetterId);
+  await setDoc(doc(db, 'letters_teacher', myLetterId), { ...letter, msg, emoji: myLetterEmoji });
+  await loadLetters();
+  closeEditModal();
+  btn.disabled = false; btn.textContent = '수정 완료';
+  render();
+  showToast('편지가 수정됐어요!');
+};
+
+window.deleteMyLetter = async () => {
+  if (!confirm('편지를 삭제할까요?')) return;
+  await deleteLetter(myLetterId);
+  await loadLetters();
+  document.getElementById('readModal').classList.remove('open');
+  myLetterId = null;
+  render();
+  showToast('편지가 삭제됐어요');
+};
+
+window.handleDelete = async (id) => {
+  if (!confirm('이 편지를 삭제할까요?')) return;
+  await deleteLetter(id);
+  await loadLetters();
+  render();
+  showToast('삭제됐어요');
+};
+
+window.copyLink = (type) => {
+  let url = BASE_URL;
+  if (type === 'write') url += '?mode=write';
+  if (type === 'admin') url += '?mode=admin';
+  navigator.clipboard.writeText(url).then(() => showToast('링크가 복사됐어요!'));
+};
+
+window.showToast = (msg) => {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+};
+
+init();
+</script>
+</body>
+</html>
